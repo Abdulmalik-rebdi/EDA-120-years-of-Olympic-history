@@ -1,7 +1,7 @@
 # Install & loading packages
 install.packages("tidytuesdayR")
 library(tidyverse)
-
+library(skimr)
 # Download all data files
 tuesdata <- tidytuesdayR::tt_load("2021-07-27")
 
@@ -23,6 +23,7 @@ olympics$sex <-  factor(olympics$sex,levels = c("M","F"))
  
 glimpse(olympics)    
 
+olympics %>% skim_without_charts()
 
 olympics %>% 
    select(sex,age,height,weight,year,season,medal)%>% 
@@ -84,7 +85,36 @@ olympics %>%
 olympics %>% 
   filter(!is.na(age)) %>% 
   summarise(mean = mean(age))
-c
+
+
+#number of males and females 
+
+
+  
+  
+  
+ 
+  # does the avg height of the athlete increases over time ?
+ 
+  # did ww1 and ww2 affect the number of participated countries ?
+ 
+  # does the avg age of the athlete increases over time ?
+  
+  #does the weather affect the performance of the country? for example, if the country has a cold weather it will perform better in the winter season
+
+  #does the winners of the sport have similar height, weight, and age over the years ?
+
+  #Is there a country dominating a certain event?
+
+
+
+
+
+
+
+
+
+
 
 #--------------------------------------------
  str(olympics)

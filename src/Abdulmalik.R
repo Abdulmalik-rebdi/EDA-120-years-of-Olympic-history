@@ -268,9 +268,8 @@ medal <-
   )
 
 medal %>% 
-  filter(medal , medal == TRUE)    ->medal1
-medal1 %>%  filter(medal , season == "Summer") ->medal1
-ggplot(medal1 , aes(year , TotalMedal  , color = medal)) + geom_line()
+  filter(medal , medal == TRUE) %>%
+ggplot(aes(x=year , y= TotalMedal  , color = season)) + geom_line()
 
 
 medal %>% 

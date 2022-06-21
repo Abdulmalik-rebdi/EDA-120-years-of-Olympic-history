@@ -6,7 +6,6 @@ install.packages("repr",dependencies = TRUE)
 
 library(plyr)
 library(dplyr)
-
 library(tidyverse)
 library(skimr)
 library(rworldmap)
@@ -220,9 +219,16 @@ winnersVslosers %>%
 event_team_prop <- olympics %>% 
   filter(!is.na(medal)) %>% 
   group_by(event,team) %>% 
-  summarise(count=n())
-
-
+  summarise(count=n()) %>% 
+  group_by(event) %>% 
+  summarise(event =event,team=team,count,total = sum(count))  %>% 
+  mutate(prop = count/total) %>% 
+  select(event,team,count,prop)
+  
+#dominating on an certain event means a team has more than 80% of the event's medals
+ dominante_teams <- event_team_prop %>% 
+  filter(prop>=0.8,count>=5)
+print.table(dominante_teams)
 
 #-----------------top 10 teams with respect to number of medals---------------------------
 
@@ -287,3 +293,36 @@ olympics %>%
 
 
 
+
+##------ mean of age in year With respect of kind of model  
+
+
+medal <-
+  olympics %>% 
+  group_by(year, medal) %>% 
+  
+  summarise(
+    age = mean(age, na.rm = TRUE) ## i dont know whay na.rm do yet but when i remove it the graph change a lot
+  )  %>%   drop_na()
+
+
+###--- plot for medal per year 
+
+ggplot(medal , aes(year , age  , color = medal)) + geom_line()
+
+
+#-----with respect with medal type (gold , silver ,bronze)
+
+medal_counts <- olympics %>% filter(!is.na(medal))%>%
+  group_by(team, medal) %>%
+  summarize(Count = length(medal)) 
+
+
+#---------- with no respect of which medal
+medal_countsALL <- olympics %>% filter(!is.na(medal))%>%
+  group_by(team) %>%
+  summarize(Count = length(medal)) 
+
+medal_countsALL <- medal_countsALL[order(medal_countsALL$Count, decreasing = TRUE), ] %>% head(10)
+
+ggplot(medal_countsALL , aes(Count , team )) + geom_bar(stat =  "identity")

@@ -142,7 +142,7 @@ art
 
 medal_counts_art <- art %>% filter(!is.na(medal))%>%
   group_by(team, medal) %>%
-  ?summarize(Count = length(medal))
+  summarize(Count = length(medal))
 
 str(medal_counts_art)
 
@@ -223,3 +223,58 @@ olympics %>%
 
 ggplot(avgAge , aes(year , Age)) + geom_bar(stat = "identity")
 ggplot(avgAge , aes(year , Age)) + geom_line() ## is it accurate  ? 
+
+#-----with respect with medal type (gold , silver ,bronze)
+
+medal_counts <- olympics %>% filter(!is.na(medal))%>%
+  group_by(team, medal) %>%
+  summarize(Count = length(medal)) 
+
+
+#---------- with no respect of which medal
+medal_countsALL <- olympics %>% filter(!is.na(medal))%>%
+  group_by(team) %>%
+  summarize(Count = length(medal)) 
+
+medal_countsALL <- medal_countsALL[order(medal_countsALL$Count, decreasing = TRUE), ] %>% head(10)
+
+ggplot(medal_countsALL , aes(Count , team )) + geom_bar(stat =  "identity")
+# ggplot(medal_countsALL , aes(Count , team )) + geom_area()
+
+##------ mean of age in year With respect of kind of model  
+
+
+medal <-
+  olympics %>% 
+  group_by(year, medal) %>% 
+  
+  summarise(
+    age = mean(age, na.rm = TRUE) ## i dont know whay na.rm do yet but when i remove it the graph change a lot
+  )  %>%   drop_na()
+
+
+###--- plot for medal per year 
+
+ggplot(medal , aes(year , age  , color = medal)) + geom_line()
+
+##----- 
+
+medal <-
+  olympics %>% 
+  group_by(year, medal = medal=="Gold" , season) %>% 
+  
+  summarise(
+    TotalMedal = length(medal) ## i dont know whay na.rm do yet but when i remove it the graph change a lot
+  )
+
+medal %>% 
+  filter(medal , medal == TRUE)    ->medal1
+medal1 %>%  filter(medal , season == "Summer") ->medal1
+ggplot(medal1 , aes(year , TotalMedal  , color = medal)) + geom_line()
+
+
+medal %>% 
+  filter(medal , medal == TRUE)    ->medal2
+medal2 %>%  filter(medal , season == "Winter") ->medal2
+ggplot(medal2 , aes(year , TotalMedal  , color = medal)) + geom_line()
+

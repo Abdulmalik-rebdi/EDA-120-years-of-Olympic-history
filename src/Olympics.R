@@ -30,19 +30,19 @@ olympics$sex <-  factor(olympics$sex,levels = c("M","F"))
 
 
 #--------------------an abstract look at the dataset------------------------
- 
+
 glimpse(olympics)    
 
 olympics %>% skim_without_charts()
 
 olympics %>% 
-   select(sex,age,height,weight,year,season,medal)%>% 
-   summary()
+  select(sex,age,height,weight,year,season,medal)%>% 
+  summary()
 
 #list of all sports Olympics did cover since 1896?
 sports <- olympics %>% 
-select(sport) %>% 
-distinct()
+  select(sport) %>% 
+  distinct()
 
 print.table(sports)
 #list of all olympics teams since 1896
@@ -87,7 +87,7 @@ games %>%
 olympics %>% 
   filter(!is.na(weight)) %>% 
   summarise(mean = mean(weight))
-  
+
 
 
 #average height of all Olympics participants since 1896
@@ -127,13 +127,13 @@ names(counts_sex)[2:3] <- c("Male","Female")
 counts_sex <- gather(counts_sex,key= sex , value = Count,2:3)
 
 ggplot(counts_sex,aes(x=year,y=Count,fill=sex)) +
-    geom_col() +
-    coord_flip() 
-  
-  
- 
+  geom_col() +
+  coord_flip() 
 
-  
+
+
+
+
 
 #----------------------------changes of athletes' height,weight and BMI over time---------------------------
 # does the avg height of the athlete increases over time ?
@@ -163,10 +163,10 @@ avgBMI <- avgBMI %>%
 
 ggplot(avgBMI ,aes(year , bmi) )+ geom_point()+ geom_smooth(se = FALSE) 
 
- 
+
 #-----------------did WW1 and WW2 affect the number of participated countries ?--------------------------
-  
-  
+
+
 #--------does the weather affect the performance of the country? for example, if the country has a cold weather it will perform better in the winter season-----------
 #needs much more work
 world <- map_data(map="world")
@@ -179,9 +179,9 @@ sPDF <- joinCountryData2Map( y
 
 mapCountryData(sPDF
                ,nameColumnToPlot='MedalCount')
-  ggplot() +
+ggplot() +
   geom_map(
-     data = world, map = world,
+    data = world, map = world,
     aes(long, lat, map_id = region),
     color = "black", fill = "lightgray", size = 0.1  ) 
 # y=ddply(olympics, .(team,medal), numcolwise(sum))
@@ -203,7 +203,7 @@ olympics %>%
 ggplot(avrgAgeInEachYear , aes(year , age)) + geom_point()+ geom_smooth(se = FALSE)
 
 winnersVslosers <- olympics %>% 
-            mutate(winner = if_else(is.na(medal),"loser","winner"))
+  mutate(winner = if_else(is.na(medal),"loser","winner"))
 
 #how old are most of the winners and lossers?
 winnersVslosers$winner <- factor(winnersVslosers$winner,levels = c("loser","winner")) 
@@ -218,9 +218,9 @@ winnersVslosers %>%
 #--------------------------Is there a country dominating on an certain event?--------------------------------
 
 event_team_prop <- olympics %>% 
-                    filter(!is.na(medal)) %>% 
-                    group_by(event,team) %>% 
-                    summarise(count=n())
+  filter(!is.na(medal)) %>% 
+  group_by(event,team) %>% 
+  summarise(count=n())
 
 
 
@@ -232,40 +232,58 @@ medal_counts <- olympics %>% filter(!is.na(medal))%>%
   summarize(Count=length(medal))
 
 # order team by total medal count
-  levs_art <- medal_counts %>%
-    group_by(team) %>%
-    summarize(Total=sum(Count)) %>%
-    arrange(Total) %>%
-    select(team) %>% 
-    tail(n=10)
+levs_art <- medal_counts %>%
+  group_by(team) %>%
+  summarize(Total=sum(Count)) %>%
+  arrange(Total) %>%
+  select(team) %>% 
+  tail(n=10)
 
-  medal_counts$team <- factor(medal_counts$team, levels=levs_art$team)
-  medal_counts <- medal_counts %>% filter(!is.na(team))
- 
-  
-    # plot
-  ggplot(medal_counts, aes(x=team, y=Count, fill=medal)) +
-    geom_col() +
-    coord_flip() +
-    scale_fill_manual(values=c("gold1","gray70","gold4")) +
-    theme(plot.title = element_text(hjust = 0.5))+
-    NULL
+medal_counts$team <- factor(medal_counts$team, levels=levs_art$team)
+medal_counts <- medal_counts %>% filter(!is.na(team))
 
 
+# plot
+ggplot(medal_counts, aes(x=team, y=Count, fill=medal)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_manual(values=c("gold1","gray70","gold4")) +
+  theme(plot.title = element_text(hjust = 0.5))+
+  NULL
 
 
- 
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
+#Number of football medals by each country from 2000-2016
+olympics %>%
+  filter(sport == "Football", year >= 2000,!is.na(medal)) %>%
+  group_by(noc) %>%
+  count(medal) %>%
+  arrange(count) %>% 
+  ggplot(aes(noc)) +
+  geom_text(position = "stack", stat='count',aes(label=..count..), vjust = -0.5) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+
+
+#number of athletes per countery 
+olympics %>%
+  group_by(noc) %>%
+  count(name) %>%
+  summarise(count = sum(n)) %>% 
+  arrange(count) %>% 
+  tail(n=20) %>% 
+  ggplot(aes(x= noc, y=count)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
   
 
-  
 
-  
 
-  
+

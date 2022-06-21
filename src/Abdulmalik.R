@@ -261,13 +261,20 @@ ggplot(medal , aes(year , age  , color = medal)) + geom_line()
 
 medal <-
   olympics %>% 
-  group_by(year, medal = medal=="Gold") %>% 
+  group_by(year, medal = medal=="Gold" , season) %>% 
   
   summarise(
     TotalMedal = length(medal) ## i dont know whay na.rm do yet but when i remove it the graph change a lot
   )
 
 medal %>% 
-  filter(medal , medal == TRUE) ->medal1
+  filter(medal , medal == TRUE)    ->medal1
+medal1 %>%  filter(medal , season == "Summer") ->medal1
 ggplot(medal1 , aes(year , TotalMedal  , color = medal)) + geom_line()
+
+
+medal %>% 
+  filter(medal , medal == TRUE)    ->medal2
+medal2 %>%  filter(medal , season == "Winter") ->medal2
+ggplot(medal2 , aes(year , TotalMedal  , color = medal)) + geom_line()
 

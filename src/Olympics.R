@@ -1,4 +1,3 @@
-# Install & loading packages
 install.packages("tidytuesdayR")
 library(tidyverse)
 library(skimr)
@@ -20,19 +19,19 @@ olympics$sex <-  factor(olympics$sex,levels = c("M","F"))
 
 
 #--------------------an abstract look at the dataset------------------------
- 
+
 glimpse(olympics)    
 
 olympics %>% skim_without_charts()
 
 olympics %>% 
-   select(sex,age,height,weight,year,season,medal)%>% 
-   summary()
+  select(sex,age,height,weight,year,season,medal)%>% 
+  summary()
 
 #list of all sports Olympics did cover since 1896?
 sports <- olympics %>% 
-select(sport) %>% 
-distinct()
+  select(sport) %>% 
+  distinct()
 
 print.table(sports)
 
@@ -72,7 +71,7 @@ games %>%
 olympics %>% 
   filter(!is.na(weight)) %>% 
   summarise(mean = mean(weight))
-  
+
 
 
 #average height of all Olympics participants since 1896
@@ -90,21 +89,21 @@ olympics %>%
 #number of males and females 
 
 
-  
-  
-  
- 
-  # does the avg height of the athlete increases over time ?
- 
-  # did ww1 and ww2 affect the number of participated countries ?
- 
-  # does the avg age of the athlete increases over time ?
-  
-  #does the weather affect the performance of the country? for example, if the country has a cold weather it will perform better in the winter season
 
-  #does the winners of the sport have similar height, weight, and age over the years ?
 
-  #Is there a country dominating a certain event?
+
+
+# does the avg height of the athlete increases over time ?
+
+# did ww1 and ww2 affect the number of participated countries ?
+
+# does the avg age of the athlete increases over time ?
+
+#does the weather affect the performance of the country? for example, if the country has a cold weather it will perform better in the winter season
+
+#does the winners of the sport have similar height, weight, and age over the years ?
+
+#Is there a country dominating a certain event?
 
 
 
@@ -117,37 +116,33 @@ olympics %>%
 
 
 #--------------------------------------------
- str(olympics)
+str(olympics)
 
+
+art <- filter(olympics,sport == "Art Competitions")
+art  
+
+
+medal_counts_art <- art %>% filter(!is.na(medal))%>%
   
-  art <- filter(olympics,sport == "Art Competitions")
-  art  
-  
-  
-    medal_counts_art <- art %>% filter(!is.na(medal))%>%
-      group_by(team, medal) %>%
-      ?summarize(Count=length(medal))
-  str(medal_counts_art)
-  
-  # order Team by total medal count
-  levs_art <- medal_counts_art %>%
-    group_by(team) %>%
-    summarize(Total=sum(Count)) %>%
-    arrange(Total) %>%
-    select(team)
-  
-  medal_counts_art$team <- factor(medal_counts_art$team, levels=levs_art$team)
+  group_by(team, medal) %>%
+  ?summarize(Count=length(medal))
+str(medal_counts_art)
 
-   # plot
-  ggplot(medal_counts_art, aes(x=team, y=Count, fill=medal)) +
-    geom_col() +
-    coord_flip() +
-    scale_fill_manual(values=c("gold1","gray70","gold4")) +
-    ggtitle("Historical medal counts from Art Competitions") +
-    theme(plot.title = element_text(hjust = 0.5))+
-    NULL
+# order Team by total medal count
+levs_art <- medal_counts_art %>%
+  group_by(team) %>%
+  summarize(Total=sum(Count)) %>%
+  arrange(Total) %>% 
+  select(team)
 
+medal_counts_art$team <- factor(medal_counts_art$team, levels=levs_art$team)
 
-
-
- 
+# plot
+ggplot(medal_counts_art, aes(x=team, y=Count, fill=medal)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_manual(values=c("gold1","gray70","gold4")) +
+  ggtitle("Historical medal counts from Art Competitions") +
+  theme(plot.title = element_text(hjust = 0.5))+
+  NULL

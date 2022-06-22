@@ -8,7 +8,7 @@ counts_NOC <- olympics %>% filter(year %in% c(1936,1956,1976,1996,2016)) %>%
   mutate(Total = sum(M,F,na.rm=T)) %>%
   filter(Total > 49) 
 names(counts_NOC)[3:4] <- c("Male","Female")
-counts_NOC$Male[is.na(counts_NOC$Male)] <- 0
+
 counts_NOC$Female[is.na(counts_NOC$Female)] <- 0
 counts_NOC$year <- as.factor(counts_NOC$year)
 
@@ -402,7 +402,7 @@ olympics %>%
 olympics %>%
   filter(year == 2016) %>%
   group_by(sex) %>%
-  summarise(sex , length(id)) %>%
+  ئذsummarise(sex , length(id)) %>%
   distinct()
   
 

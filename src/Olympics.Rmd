@@ -1,0 +1,88 @@
+---
+title: "Wine Report"
+author: "Amal Alghamdi"
+date: '2022-06-15'
+output: html_document
+
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../"
+    )
+  })
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(janitor)
+library(GGally)
+library(here)
+library(kableExtra)
+library(tidytuesdayR)
+
+
+```
+
+## Introduction
+This is a historical dataset on the modern Olympic Games, including all the Games from Athens 1896 to Rio 2016
+
+
+```{r, echo=FALSE}
+tuesdata <- tidytuesdayR::tt_load("2021-07-27")
+
+olympics <- tuesdata$olympics
+regions <- tuesdata$regions  #It is not required, but may prove useful in certain cases
+
+```
+
+## Dataset
+The file contains 271116 rows and 15 columns.
+The columns are:
+
+1-ID - Unique number for each athlete\
+2-Name - Athlete's name\
+3-Sex - M or F\
+4-Age - Integer\
+5-Height - In centimeters\
+6-Weight - In kilograms\
+7-Team - Team name\
+8-NOC - National Olympic Committee 3-letter code\
+9-Games - Year and season\
+11-Year - Integer\
+12-Season - Summer or Winter\
+13-City - Host city\
+14-Sport - Sport\
+15 - Event\
+16-Medal - Gold, Silver, Bronze, or NA\
+
+
+```{r, echo=FALSE}
+glimpse(olympics)
+summary(olympics)
+
+```
+
+```{r, echo=FALSE}
+counts_NOC <- olympics %>% filter(year %in% c(1936,1956,1976,1996,2016)) %>%
+  group_by(year, noc, sex) %>%
+  summarize(Count = length(unique(id))) %>%
+  spread(sex, Count) %>%
+  mutate(Total = sum(M,F,na.rm=T)) %>%
+  filter(Total > 49) 
+names(counts_NOC)[3:4] <- c("Male","Female")
+counts_NOC$Male[is.na(counts_NOC$Male)] <- 0
+counts_NOC$Female[is.na(counts_NOC$Female)] <- 0
+counts_NOC$year <- as.factor(counts_NOC$year)
+
+ggplot(counts_NOC, aes(x=Male, y=Female, group=year, color=year)) +
+  geom_point(alpha=0.6) +
+  geom_abline(intercept=0, slope=1, linetype="dashed") +
+  geom_smooth(method="lm", se=FALSE) +
+  labs(title = "Female vs. Male Olympians from participating NOCs") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  guides(color=guide_legend(reverse=TRUE))
+```
+
+

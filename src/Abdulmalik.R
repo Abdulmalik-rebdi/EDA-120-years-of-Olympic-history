@@ -246,16 +246,14 @@ ggplot(medal_countsALL , aes(Count , team )) + geom_bar(stat =  "identity")
 
 medal <-
   olympics %>% 
-  group_by(year, medal) %>% 
-  
-  summarise(
-    age = mean(age, na.rm = TRUE) ## i dont know whay na.rm do yet but when i remove it the graph change a lot
-  )  %>%   drop_na()
+  group_by(age, medal) %>% 
+  filter(!is.na(medal),!is.na(age)) %>% 
+  summarise(count = n() ) 
 
 
 ###--- plot for medal per year 
 
-ggplot(medal , aes(year , age  , color = medal)) + geom_line()
+ggplot(medal , aes(x=year , y= age  , color = medal, size = count)) + geom_point()
 
 ##----- 
 
@@ -268,9 +266,12 @@ medal <-
   )
 
 medal %>% 
-  filter(medal , medal == TRUE) %>%
-ggplot(aes(x=year , y= TotalMedal  , color = season)) + geom_line()
+  filter( medal == TRUE) %>%
+  ggplot(aes(x=year , y= TotalMedal  , color = season)) + geom_line()
 
+ggplot(Vocab, aes(education, vocabulary)) +
+  geom_jitter(alpha = 0.15, shape = 16) +
+  coord_fixed()
 
 medal %>% 
   filter(medal , medal == TRUE)    ->medal2

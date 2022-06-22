@@ -5,7 +5,6 @@ output:
     orientation: row
     vertical_layout: scroll
     theme: united
-    code_folding: hide
 
 
 ---
@@ -70,16 +69,12 @@ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 **You can access the dataset directly from base package.**
 
-## Row 1 {data-height= 650}
+## Row 1 {data-height= 350, .tabset}
 
 **The detailed summary for every type as follow**
 
 
 ```{r}
-DT::datatable(olympics, 
-              rownames = FALSE, 
-              options = list(pageLength = 5, scrollX = TRUE), 
-              class = 'white-space: nowrap' )
 olympics %>% skim_without_charts()
 ```
 

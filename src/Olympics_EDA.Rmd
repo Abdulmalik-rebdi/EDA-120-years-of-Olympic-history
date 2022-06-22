@@ -73,9 +73,10 @@ You can access the dataset directly from base package.
 The detailed summary for every type as follow
 
 
-```{r results='markup'}
+```{r}
 
-olympics %>% skim_without_charts()
+olympics %>% 
+  skim_without_charts()
 
 
 ```

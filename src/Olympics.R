@@ -10,6 +10,7 @@ library(tidyverse)
 library(skimr)
 library(rworldmap)
 library(repr)
+library(plotly)
 # Download all data files
 tuesdata <- tidytuesdayR::tt_load("2021-07-27")
 

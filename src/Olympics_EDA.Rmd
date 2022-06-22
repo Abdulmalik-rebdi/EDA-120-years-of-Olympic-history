@@ -1,0 +1,161 @@
+---
+title: "Olympics Report"
+date: '2022-06-21'
+
+output: 
+  html_document:
+    toc : true
+    number_sections: true
+    toc_float : true
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+```{r echo = FALSE}
+
+library(plyr)
+library(dplyr)
+library(tidyverse)
+library(skimr)
+library(rworldmap)
+library(repr)
+library(plotly)
+#import data 
+tuesdata <- tidytuesdayR::tt_load("2021-07-27")
+# Individual dataframes
+olympics <- tuesdata$olympics
+
+# A second dataframe is available
+# It is not required, but may prove useful in certain cases
+regions <- tuesdata$regions
+olympics$medal <- factor(olympics$medal,levels = c("Gold","Silver","Bronze"))
+olympics$season <- factor(olympics$season,levels = c("Summer","Winter"))
+olympics$sex <-  factor(olympics$sex,levels = c("M","F"))
+
+```
+
+# DATA 
+
+The dataset contains the following variables:
+
+
+| Variable | Type      | Description                                    |
+|----------|-----------|------------------------------------------------|
+| id       | double    | Athlete unique ID                              |
+| name     | character | Athlete Name                                   |
+| sex      | character | Athlete Sex                                    | 
+| age      | double    | Athlete Age                                    |
+| height   | double    | Athlete Height (cm)                            | 
+| weight   | double    | Athlete weight (kg)                            |
+| team     | character | Team name, typically a country name            |
+| noc      | character | NOC 3-letter country code                      |
+| games    | character | 4-digit year + season                          |
+| year     | double    | 4-digit year                                   | 
+| season   | character | Season                                         |
+| city     | character | Host city                                      | 
+| sport    | character | Sport                                          |
+| event    | character | Sport + Event Name                             |
+| medal    | character | Medal: Gold, Silver, Bronze, (plus NA values)  |
+
+You can access the dataset directly from base package.
+
+The detailed summary for every type as follow
+
+
+```{r}
+olympics %>% skim_without_charts()
+
+```
+
+# EDA 
+average wight of all Olympics participants since 1896
+
+
+```{r}
+olympics %>% 
+  filter(!is.na(weight)) %>% 
+  summarise(mean = mean(weight))
+```
+average height of all Olympics participants since 1896
+
+```{r}
+olympics %>% 
+  filter(!is.na(height)) %>% 
+  summarise(mean = mean(height))
+```
+average age of all Olympics participants since 1896
+```{r}
+olympics %>% 
+  filter(!is.na(age)) %>% 
+  summarise(mean = mean(age))
+```
+## how did the numbers of female and male athlete changed over time
+```{r}
+#count the number of females and males for each year
+counts_sex <- olympics %>% 
+  group_by(year, sex) %>%
+  summarize(Count = length(unique(id))) %>%
+  spread(sex, Count)
+
+#clean the data
+counts_sex$M[is.na(counts_sex$M)] <- 0
+counts_sex$F[is.na(counts_sex$F)] <- 0
+counts_sex$year <- as.factor(counts_sex$year)
+
+#calculate the total on participants 
+counts_sex <- mutate(counts_sex,Total = sum(M,F,na.rm=T)) 
+
+#calculate the percentage of females and males from the total
+counts_sex$M <- counts_sex$M/counts_sex$Total
+counts_sex$F <- counts_sex$F/counts_sex$Total
+
+#creating the graph
+names(counts_sex)[2:3] <- c("Male","Female")
+counts_sex <- gather(counts_sex,key= sex , value = Count,2:3)
+
+ggplot(counts_sex,aes(x=year,y=Count,fill=sex)) +
+  geom_col() +
+  coord_flip() 
+```
+
+## changes of athletes' height,weight and BMI over time {.tabset}
+
+### Height
+```{r}
+olympics %>% 
+  filter(!is.na(height)) %>% 
+  group_by(year) %>% 
+  summarise( height= mean(height))-> avgHight
+
+ggplot(avgHight , aes(year , height)) + geom_point()+ geom_smooth(se = FALSE)
+```
+
+### Weight
+```{r}
+olympics %>% 
+  filter(!is.na(weight)) %>% 
+  group_by(year) %>% 
+  summarise( weight= mean(weight))-> avgWeight
+
+ggplot(avgWeight , aes(year , weight)) + geom_point()+ geom_smooth(se = FALSE)
+```
+
+### BMI
+
+```{r}
+avgBMI <- avgHight
+avgBMI$weight <- avgWeight$weight
+
+avgBMI <- avgBMI %>% 
+  mutate(bmi = (weight)/(height/100 * height/100))
+
+ggplot(avgBMI ,aes(year , bmi) )+ geom_point()+ geom_smooth(se = FALSE)
+```
+
+## did WW1 and WW2 affect the number of participated countries ?
+.
+.
+.
+# Conclusion 

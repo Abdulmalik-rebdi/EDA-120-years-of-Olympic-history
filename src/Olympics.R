@@ -1,25 +1,6 @@
-<<<<<<< HEAD
-library(tidyverse)
-library(janitor)
-library(GGally)
-library(here)
-library(kableExtra)
-library(tidytuesdayR)
 
 
-
-tuesdata <- tidytuesdayR::tt_load("2021-07-27")
-
-olympics <- tuesdata$olympics
-regions <- tuesdata$regions  #It is not required, but may prove useful in certain cases
-
-# olympics %>% 
-#   clean_names() -> olympics
-
-glimpse(olympics)
-summary(olympics)
-
-
+# -----------------??-----------------------
 counts_NOC <- olympics %>% filter(year %in% c(1936,1956,1976,1996,2016)) %>%
   group_by(year, noc, sex) %>%
   summarize(Count = length(unique(id))) %>%
@@ -50,10 +31,10 @@ olympics %>% group_by(name , team) %>%
   scale_color_manual(values=c("darkblue","red"))  +
   theme(plot.title = element_text(hjust = 0.5)) +
   labs(title="Height/Weight data completeness from each Olympiad")
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
-=======
 # Install & loading packages
+install.packages("kableExtra", dependencies = TRUE)
 install.packages("tidytuesdayR")
 install.packages("plyr", dependencies = TRUE)
 install.packages("rworldmap", dependencies = TRUE)
@@ -65,8 +46,12 @@ library(tidyverse)
 library(skimr)
 library(rworldmap)
 library(repr)
-library(plotly)
 library(DT)
+library(janitor)
+library(GGally)
+library(here)
+library(kableExtra)
+library(tidytuesdayR)
 # Download all data files
 tuesdata <- tidytuesdayR::tt_load("2021-07-27")
 
@@ -94,6 +79,7 @@ olympics %>% skim_without_charts()
 olympics %>% 
   select(sex,age,height,weight,year,season,medal)%>% 
   summary()
+
 
 #list of all sports Olympics did cover since 1896?
 olympics %>% 
@@ -390,10 +376,3 @@ ggplot(medal , aes(x=year , y=age, color = medal)) + geom_line() +
 scale_color_manual(values=c("gold1","gray70","gold4")) 
   
 
-
-
-<<<<<<< HEAD
- 
->>>>>>> e4ec7c19c67b5b7bb14fab185622ca0451252d2d
-=======
->>>>>>> 5be2aa8f2ff6cf29b28aaee34b7230df55297136

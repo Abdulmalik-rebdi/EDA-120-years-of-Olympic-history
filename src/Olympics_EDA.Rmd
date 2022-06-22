@@ -11,17 +11,23 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(comment = NA, results='hide', message = FALSE, warning = FALSE)
 ```
-```{r echo = FALSE}
-
+```{r }
+#loading reqiuerd packages
 library(plyr)
 library(dplyr)
 library(tidyverse)
 library(skimr)
 library(rworldmap)
 library(repr)
-library(plotly)
+library(DT)
+library(janitor)
+library(GGally)
+library(here)
+library(kableExtra)
+library(tidytuesdayR)
+
 #import data 
 tuesdata <- tidytuesdayR::tt_load("2021-07-27")
 # Individual dataframes
@@ -73,23 +79,26 @@ olympics %>% skim_without_charts()
 average wight of all Olympics participants since 1896
 
 
-```{r}
+```{r results='markup'}
 olympics %>% 
   filter(!is.na(weight)) %>% 
-  summarise(mean = mean(weight))
+  summarise(mean = mean(weight)) %>% 
+  print.table()
 ```
 average height of all Olympics participants since 1896
 
-```{r}
+```{r results='markup'}
 olympics %>% 
   filter(!is.na(height)) %>% 
-  summarise(mean = mean(height))
+  summarise(mean = mean(height))%>% 
+  print.table()
 ```
 average age of all Olympics participants since 1896
-```{r}
+```{r results='markup'}
 olympics %>% 
   filter(!is.na(age)) %>% 
-  summarise(mean = mean(age))
+  summarise(mean = mean(age))%>% 
+  print.table()
 ```
 ## how did the numbers of female and male athlete changed over time
 ```{r}
@@ -155,9 +164,53 @@ ggplot(avgBMI ,aes(year , bmi) )+ geom_point()+ geom_smooth(se = FALSE)
 ```
 
 ## did WW1 and WW2 affect the number of participated countries ?
-.
-.
-.
+
+### How did the Olympics suffer from the WWII
+
+```{r}
+medal2 <-
+  olympics %>% 
+  group_by(year, medal = medal=="Gold" , season) %>% #the idea here is when we group by medal = gold this will show us the number of games (one medal per game)
+  
+  summarise(
+    TotalMedal = length(medal) ## i dont know whay na.rm do yet but when i remove it the graph change a lot
+  )
+
+
+medal2 %>% 
+  filter(medal , medal == TRUE)    ->medal ##the idea here is will count the number of true(medal == gold) in each year summer or 
+
+ggplot(medal , aes(year , TotalMedal  , color = season)) + geom_line() +
+  geom_point(aes(x=1920, y=470), size=30, shape=1, color="gold4") +
+  geom_point(aes(x=1945, y=300), size=30, shape=1, color="gold4") +
+  labs(title ="WWII & Olympcs " ,y = "Total Games", x = "YEAR of the event" , caption = "*the circles shows the start and the end of the war \n this also shows that the winter olympics started in the middle of the war  ") +
+  # please change the title to good name
+  theme_bw() + theme(legend.position = c(.05,.92) , )
+
+```
+
+### Germany in wrold war 2 
+
+```{r}
+olympics %>% 
+  group_by(team , year ) %>% 
+  filter(grepl("Germany", team)) %>% 
+  
+  # filter(team == "Germany" | team == "*Germany" ) %>% 
+  summarise( team , year , numberOfParticipants= length(name) ,season) %>% 
+  distinct() -> GermanyDataset
+
+GermanyDataset  %>% 
+  ggplot(aes(year ,numberOfParticipants , color = team )) + geom_bar(stat = "identity")+ ##  I dont like this plot but  
+  
+  facet_grid(. ~ season) +
+  labs(title = "Germany during WWII era" , caption = " between 1920 to 1945 Germany have not played any olympics except 3   ") 
+
+
+
+
+```
+
 
 ## does the age of the athlete effect on his/her performance?
 The avg age in each year
@@ -175,7 +228,7 @@ winnersVslosers <- olympics %>%
   mutate(winner = if_else(is.na(medal),"loser","winner"))
 ```
 
-## How old are most of the winners and losers?
+### How old are most of the winners and losers?
 
 ```{r}
 winnersVslosers$winner <- factor(winnersVslosers$winner,levels = c("loser","winner")) 
@@ -234,51 +287,6 @@ ggplot(medal_countsALL , aes(Count , team )) + geom_bar(stat =  "identity")
 
 ```
 
-## How did the Olympics suffer from the WWII
-
-```{r}
-medal2 <-
-  olympics %>% 
-  group_by(year, medal = medal=="Gold" , season) %>% #the idea here is when we group by medal = gold this will show us the number of games (one medal per game)
-  
-  summarise(
-    TotalMedal = length(medal) ## i dont know whay na.rm do yet but when i remove it the graph change a lot
-  )
-
-
-medal2 %>% 
-  filter(medal , medal == TRUE)    ->medal ##the idea here is will count the number of true(medal == gold) in each year summer or 
-
-ggplot(medal , aes(year , TotalMedal  , color = season)) + geom_line() +
-  geom_point(aes(x=1920, y=470), size=30, shape=1, color="gold4") +
-  geom_point(aes(x=1945, y=300), size=30, shape=1, color="gold4") +
-  labs(title ="WWII & Olympcs " ,y = "Total Games", x = "YEAR of the event" , caption = "*the circles shows the start and the end of the war \n this also shows that the winter olympics started in the middle of the war  ") +
-  # please change the title to good name
-  theme_bw() + theme(legend.position = c(.05,.92) , )
-
-```
-
-## Germany in wrold war 2 
-
-```{r}
-olympics %>% 
-  group_by(team , year ) %>% 
-  filter(grepl("Germany", team)) %>% 
-  
-  # filter(team == "Germany" | team == "*Germany" ) %>% 
-  summarise( team , year , numberOfParticipants= length(name) ,season) %>% 
-  distinct() -> GermanyDataset
-
-GermanyDataset  %>% 
-  ggplot(aes(year ,numberOfParticipants , color = team )) + geom_bar(stat = "identity")+ ##  I dont like this plot but  
-  
-  facet_grid(. ~ season) +
-  labs(title = "Germany during WWII era" , caption = " between 1920 to 1945 Germany have not played any olympics except 3   ") 
-
-
-
-
-```
 
 ## Number of football medals by each team from 2000-2016
 

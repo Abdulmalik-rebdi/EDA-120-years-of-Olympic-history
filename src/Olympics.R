@@ -10,7 +10,11 @@ library(tidyverse)
 library(skimr)
 library(rworldmap)
 library(repr)
+<<<<<<< HEAD
 library(plotly)
+=======
+library(DT)
+>>>>>>> bf3bacdf4a012b3817b43537cc9a7dae564ae0c4
 # Download all data files
 tuesdata <- tidytuesdayR::tt_load("2021-07-27")
 
@@ -40,45 +44,47 @@ olympics %>%
   summary()
 
 #list of all sports Olympics did cover since 1896?
-sports <- olympics %>% 
+olympics %>% 
   select(sport) %>% 
-  distinct()
+  distinct()%>% 
+  datatable()
 
-print.table(sports)
+
 #list of all olympics teams since 1896
-teams <- olympics %>% 
+olympics %>% 
   select(team) %>% 
-  distinct()
+  distinct()%>% 
+  datatable()
 
-print.table(teams)
+
 
 #list of Olympics events since 1896
-events <- olympics %>% 
+olympics %>% 
   select(event) %>% 
-  distinct()
+  distinct()%>% 
+  datatable()
 
-print.table(events)
 
 #list of all Olympics games
-games <- olympics %>% 
+ olympics %>% 
   select(games) %>% 
   distinct()%>% 
-  arrange_all()
+  arrange_all()%>% 
+  datatable()
 
-print.table(games)
+
 
 #list of all years in which Olympics games happens
-years <- olympics %>% 
+ olympics %>% 
   select(year) %>% 
   distinct() %>% 
-  arrange_all()
+  arrange_all()%>% 
+  datatable()
 
-print.table(years)
 
 
 
 #how many times did Olympics happens ?
-
 games %>% 
   count()
 
@@ -101,6 +107,17 @@ olympics %>%
   filter(!is.na(age)) %>% 
   summarise(mean = mean(age))
 
+
+#is there any kids(less than 13) got an Olympic medals?
+olympics %>% 
+  filter(age<13, !is.na(medal)) %>% 
+  datatable()
+
+
+#is there any elders(more than 65) got an Olympic medals?
+olympics %>% 
+  filter(age>65, !is.na(medal)) %>% 
+  datatable()
 
 #-----------------------how did the numbers of female and male athlete changed over time------------------------
 
@@ -128,7 +145,8 @@ counts_sex <- gather(counts_sex,key= sex , value = Count,2:3)
 
 ggplot(counts_sex,aes(x=year,y=Count,fill=sex)) +
   geom_col() +
-  coord_flip() 
+  coord_flip() +
+  labs(x="Year",y="Male/Female Percentage")
 
 
 
@@ -159,9 +177,9 @@ avgBMI <- avgHight
 avgBMI$weight <- avgWeight$weight
 
 avgBMI <- avgBMI %>% 
-  mutate(bmi = (weight)/(height/100 * height/100))
+  mutate(BMI = (weight)/(height/100 * height/100))
 
-ggplot(avgBMI ,aes(year , bmi) )+ geom_point()+ geom_smooth(se = FALSE) 
+ggplot(avgBMI ,aes(year , BMI) )+ geom_point()+ geom_smooth(se = FALSE) 
 
 
 #-----------------did WW1 and WW2 affect the number of participated countries ?--------------------------
@@ -205,12 +223,16 @@ ggplot(avrgAgeInEachYear , aes(year , age)) + geom_point()+ geom_smooth(se = FAL
 winnersVslosers <- olympics %>% 
   mutate(winner = if_else(is.na(medal),"loser","winner"))
 
-#how old are most of the winners and lossers?
+#how old are most of the winners and losers?
 winnersVslosers$winner <- factor(winnersVslosers$winner,levels = c("loser","winner")) 
+
 winnersVslosers %>%
   filter(!is.na(age)) %>% 
   group_by(winner,age) %>% 
-  summarise(count=n()) %>% 
+  summarise(count=n()) -> winnersVslosers
+
+#plot
+winnersVslosers %>% 
   ggplot(aes(x=age ,fill= winner)) +
   geom_density(alpha=0.25)
 
@@ -226,10 +248,11 @@ event_team_prop <- olympics %>%
   mutate(prop = count/total) %>% 
   select(event,team,count,prop)
   
-#dominating on an certain event means a team has more than 80% of the event's medals
- dominante_teams <- event_team_prop %>% 
-  filter(prop>=0.8,count>=5)
-print.table(dominante_teams)
+#dominating on an certain event means a team has more than 50% of the medals of an event that have happened at least 10 times
+
+#plot
+event_team_prop %>% 
+ filter(prop>0.5,count>=10) 
 
 #-----------------top 10 teams with respect to number of medals---------------------------
 
@@ -244,7 +267,7 @@ levs_art <- medal_counts %>%
   summarize(Total=sum(Count)) %>%
   arrange(Total) %>%
   select(team) %>% 
-  tail(n=10)
+  tail(n=20)
 
 medal_counts$team <- factor(medal_counts$team, levels=levs_art$team)
 medal_counts <- medal_counts %>% filter(!is.na(team))
@@ -256,7 +279,7 @@ ggplot(medal_counts, aes(x=team, y=Count, fill=medal)) +
   coord_flip() +
   scale_fill_manual(values=c("gold1","gray70","gold4")) +
   theme(plot.title = element_text(hjust = 0.5))+
-  NULL
+  labs(x="Team",y="Number of Medals athletes since 1896")
 
 
 
@@ -265,16 +288,20 @@ ggplot(medal_counts, aes(x=team, y=Count, fill=medal)) +
 
 
 
-#Number of football medals by each country from 2000-2016
-olympics %>%
+
+#--------------------Number of football medals by each team from 2000-2016--------------------------
+football_teams_medals<- olympics %>%
   filter(sport == "Football", year >= 2000,!is.na(medal)) %>%
-  group_by(noc) %>%
-  count(medal) %>%
-  arrange(count) %>% 
-  ggplot(aes(noc)) +
-  geom_text(position = "stack", stat='count',aes(label=..count..), vjust = -0.5) +
-  geom_bar() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  group_by(team) %>%
+  summarise(count=n()) %>% 
+  arrange(count) 
+
+#plot
+football_teams_medals %>% 
+  ggplot(aes( x= reorder(team,count),y= count)) +
+  geom_col() +
+  coord_flip() +
+  labs(x="Team",y="Number of Football Medals from 2000 to 2016")
 
 
 
@@ -285,45 +312,30 @@ olympics %>%
   summarise(count = sum(n)) %>% 
   arrange(count) %>% 
   tail(n=20) %>% 
-  ggplot(aes(x= noc, y=count)) +
-  geom_bar(stat = "identity") +
-  coord_flip() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
   
+#plot
+ggplot(aes(x= reorder(noc,count), y=count)) +
+ geom_col() +
+ coord_flip() +
+ labs(x="Team",y="Number of Olympics athletes since 1896")
 
 
 
 
 
-##------ mean of age in year With respect of kind of model  
 
+#------------mean of age in year With respect of kind of model----------------------
 
 medal <-
   olympics %>% 
-  group_by(year, medal) %>% 
+  filter(!is.na(age),!is.na(medal)) %>% 
+  group_by(age, medal) %>% 
+  summarise(Count = n())
+
+#plot
+ggplot(medal , aes(age , y=Count, color = medal)) + geom_line() +
+scale_color_manual(values=c("gold1","gray70","gold4")) 
   
-  summarise(
-    age = mean(age, na.rm = TRUE) ## i dont know whay na.rm do yet but when i remove it the graph change a lot
-  )  %>%   drop_na()
 
 
-###--- plot for medal per year 
 
-ggplot(medal , aes(year , age  , color = medal)) + geom_line()
-
-
-#-----with respect with medal type (gold , silver ,bronze)
-
-medal_counts <- olympics %>% filter(!is.na(medal))%>%
-  group_by(team, medal) %>%
-  summarize(Count = length(medal)) 
-
-
-#---------- with no respect of which medal
-medal_countsALL <- olympics %>% filter(!is.na(medal))%>%
-  group_by(team) %>%
-  summarize(Count = length(medal)) 
-
-medal_countsALL <- medal_countsALL[order(medal_countsALL$Count, decreasing = TRUE), ] %>% head(10)
-
-ggplot(medal_countsALL , aes(Count , team )) + geom_bar(stat =  "identity")

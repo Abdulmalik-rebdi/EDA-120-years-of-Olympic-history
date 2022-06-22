@@ -7,11 +7,13 @@ output:
     toc : true
     number_sections: true
     toc_float : true
+    code_folding: hide
 
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(comment = NA, results='hide', message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(comment = NA, results='hide', message = FALSE, warning = FALSE )
+
 ```
 ```{r }
 #loading reqiuerd packages
@@ -70,7 +72,7 @@ You can access the dataset directly from base package.
 The detailed summary for every type as follow
 
 
-```{r}
+```{r results='markup'}
 olympics %>% skim_without_charts()
 
 ```

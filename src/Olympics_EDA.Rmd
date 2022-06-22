@@ -352,9 +352,10 @@ GermanyDataset  %>%
 
 ## does the age of the athlete effect on his/her performance?
 
+as we know older people elders are worse in sports than younger, but does this fact also apply on Olympic athlete ?
 
 ### The changes of avg age of athelte over time
-
+in this plot we can see the average age of Olympic athlete since 1897 to 2016,an we can see that mean of age increses between 1912 and 1948, this doesn't mean their generation was stronger or they were eating healthy this is acullty in those years there was a few events that allows elders to participate and win e.g. art competition
 ```{r}
 olympics %>% 
   select(year , team,age) %>%
@@ -364,14 +365,18 @@ olympics %>%
 
 ggplot(avrgAgeInEachYear , aes(year , age)) + geom_point()+ geom_smooth(se = FALSE)
 
-winnersVslosers <- olympics %>% 
-  mutate(winner = if_else(is.na(medal),"loser","winner"))
+
 ```
 
 
 ### How old are most of the winners and losers?
 
+this plot tells us the density of elder losers is actually higher the the density of elder winnerss,so this means yes younger actually have more wining possibility than elders.
+
 ```{r}
+winnersVslosers <- olympics %>% 
+  mutate(winner = if_else(is.na(medal),"loser","winner"))
+
 winnersVslosers$winner <- factor(winnersVslosers$winner,levels = c("loser","winner")) 
 
 winnersVslosers %>%
@@ -411,6 +416,8 @@ scale_color_manual(values=c("gold1","gray70","gold4"))
 
 ### kids who got Olympics models(less than 13)
 
+this table shows kids who have won an Olympic medal and what events they won in, it tells us that kids have more possiplty to win a medal if they were within Gymnastics events.
+
 ```{r results='markup'}
 
 #is there any kids(less than 13) got an Olympic medals?
@@ -421,6 +428,8 @@ olympics %>%
 
 
 ### elders who got Olympics models(above 65)
+
+this table shows elders who have won an Olympic medal and what events they won in, it tells us that elders have more possibility to win a medal if they were within Art events but unfortunately they stopped a long time ago.
 
 ```{r results='markup'}
 

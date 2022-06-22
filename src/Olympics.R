@@ -109,11 +109,12 @@ olympics %>%
   filter(age<13, !is.na(medal)) %>% 
   datatable()
 
+#is there any kids(less than 13) got an Olympic medals?
 
-#is there any elders(more than 65) got an Olympic medals?
 olympics %>% 
-  filter(age>65, !is.na(medal)) %>% 
+        filter(weight>150, !is.na(medal)) %>% 
   datatable()
+
 
 #-----------------------how did the numbers of female and male athlete changed over time------------------------
 

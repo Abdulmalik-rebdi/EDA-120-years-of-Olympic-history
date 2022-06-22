@@ -245,45 +245,6 @@ ggplot(medal_countsALL , aes(Count , team )) + geom_bar(stat =  "identity")
 
 ##------ mean of age in year With respect of kind of model  
 
-
-AgeAndHowManyGold <-
-  olympics %>%
-  group_by(year,age, medal) %>% 
-  filter(medal == "Gold",!is.na(age)) %>% 
-  summarise(count = n() ) 
-
-
-
-
-   medal <- olympics %>% 
-  group_by(year, medal) %>% 
-  
-  summarise(
-    age = mean(age, na.rm = TRUE ) ## i dont know whay na.rm do yet but when i remove it the graph change a lot
-    , season =season
-  )  
-
-
-   
-   AgeAndHowManyMedal <-
-     olympics %>%
-     group_by(year,age, medal) %>% 
-     filter(!is.na(medal),!is.na(age)) %>% 
-     summarise(count = n() ) 
-   
-
-###--- plot for medal per year 
-
-ggplot(medal , aes(x=year , y= age  , color = medal )) + geom_line() +   facet_grid(. ~ season) #summer and winter game 
-
-
-ggplot(AgeAndHowManyGold , aes(x=age ,year , color = medal  ,size = count)) + geom_point() ## this will show only gold medal 
-
-
-ggplot(AgeAndHowManyMedal , aes(x=age ,year , color = medal  ,size = count)) +  geom_jitter(alpha = 0.3, shape = 16) +
-  coord_fixed() + scale_color_brewer(palette = "BrBG") ## this will show ALL medal 
-
-
 ##----- will show number of events per year
 
 medal2 <-
@@ -304,7 +265,7 @@ medal2 %>%
 
 ggplot(medal , aes(year , TotalMedal  , color = season)) + geom_line()
 
-###------
+  ###------
 
 # 
 # medal %>% 

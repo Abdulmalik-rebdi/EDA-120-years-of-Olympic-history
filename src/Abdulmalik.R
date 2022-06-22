@@ -246,40 +246,58 @@ ggplot(medal_countsALL , aes(Count , team )) + geom_bar(stat =  "identity")
 ##------ mean of age in year With respect of kind of model  
 
 
-medal <-
-  olympics %>% 
-<<<<<<< HEAD
-  group_by(age, medal) %>% 
-  filter(!is.na(medal),!is.na(age)) %>% 
+AgeAndHowManyGold <-
+  olympics %>%
+  group_by(year,age, medal) %>% 
+  filter(medal == "Gold",!is.na(age)) %>% 
   summarise(count = n() ) 
-=======
+
+
+
+
+   medal <- olympics %>% 
   group_by(year, medal) %>% 
   
   summarise(
-    age = mean(age, na.rm = TRUE) ## i dont know whay na.rm do yet but when i remove it the graph change a lot
+    age = mean(age, na.rm = TRUE ) ## i dont know whay na.rm do yet but when i remove it the graph change a lot
+    , season =season
   )  
->>>>>>> 67f771fc53809ced366ff31103227c9110397417
 
+
+   
+   AgeAndHowManyMedal <-
+     olympics %>%
+     group_by(year,age, medal) %>% 
+     filter(!is.na(medal),!is.na(age)) %>% 
+     summarise(count = n() ) 
+   
 
 ###--- plot for medal per year 
 
-ggplot(medal , aes(x=year , y= age  , color = medal, size = count)) + geom_point()
+ggplot(medal , aes(x=year , y= age  , color = medal )) + geom_line() +   facet_grid(. ~ season) #summer and winter game 
 
-##----- 
+
+ggplot(AgeAndHowManyGold , aes(x=age ,year , color = medal  ,size = count)) + geom_point() ## this will show only gold medal 
+
+
+ggplot(AgeAndHowManyMedal , aes(x=age ,year , color = medal  ,size = count)) +  geom_jitter(alpha = 0.3, shape = 16) +
+  coord_fixed() + scale_color_brewer(palette = "BrBG") ## this will show ALL medal 
+
+
+##----- will show number of events per year
 
 medal2 <-
   olympics %>% 
   group_by(year, medal = medal=="Gold" , season) %>% #the idea here is when we group by medal = gold this will show us the number of games (one medal per game)
-  
   summarise(
     TotalMedal = length(medal) ## i dont know whay na.rm do yet but when i remove it the graph change a lot
   )
 
-<<<<<<< HEAD
-medal %>% 
-  filter( medal == TRUE) %>%
-  ggplot(aes(x=year , y= TotalMedal  , color = season)) + geom_line()
-=======
+# <<<<<<< HEAD
+# medal %>% 
+#   filter( medal == TRUE) %>%
+#   ggplot(aes(x=year , y= TotalMedal  , color = season)) + geom_line()
+# =======
 
 medal2 %>% 
   filter(medal , medal == TRUE)    ->medal ##the idea here is will count the number of true(medal == gold) in each year summer or 
@@ -318,7 +336,7 @@ ggplot(medal , aes(year , TotalMedal  , color = season)) + geom_line() +
   # please change the title to good name
   theme_bw() + theme(legend.position = c(.05,.92) , )
 
-# theme( axis.title = "Total Games" , axis.title.y ="Total Games" , axis.title.x = "YEAR of the event" )  
+
 #--------------------
 ## germany in wrold war 2 
 olympics %>% 
@@ -330,10 +348,10 @@ olympics %>%
   distinct() -> GermanyDataset
 
 GermanyDataset  %>% 
-  ggplot(aes(year ,numberOfParticipants , color = team )) + geom_bar(stat = "identity")+ ##  I dont like this plot but  
+  ggplot(aes(year ,numberOfParticipants , fill = team )) + geom_bar(stat = "identity")+ ##  I dont like this plot but  
   
   facet_grid(. ~ season) +
-  labs(title = "Germany during WWII era" , caption = " between 1920 to 1945 Germany have not played any olympics except 3   ") 
+  labs(title = "Germany during WWII era" , caption = " between 1920 to 1945 Germany have not played any olympics except 3   ") +scale_color_brewer(palette = "Dark3")
 
 #-----
 
@@ -347,6 +365,9 @@ olympics %>%
   arrange( desc(total)  ) %>%  head(10)  -> medalyPerson
 
 
+medalyPerson %>% 
+ggplot(aes(name , total)) + geom_col() 
+
 #----
 
 #the most person with GOLD medals
@@ -356,10 +377,11 @@ olympics %>%
   summarise(name , total = length(medal)) %>%  distinct() %>% 
   arrange( desc(total)  ) %>%  head(10) -> GoldenPerson
 
->>>>>>> 67f771fc53809ced366ff31103227c9110397417
+GoldenPerson %>% 
+  ggplot(aes(name , total)) + geom_col()
 
-ggplot(Vocab, aes(education, vocabulary)) +
-  geom_jitter(alpha = 0.15, shape = 16) +
-  coord_fixed()
+
+
+
 
 

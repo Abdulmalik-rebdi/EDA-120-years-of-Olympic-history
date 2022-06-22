@@ -9,6 +9,7 @@ output:
     toc_float : true
     code_folding: hide
 
+
 ---
 
 ```{r setup, include=FALSE}
@@ -73,7 +74,9 @@ The detailed summary for every type as follow
 
 
 ```{r results='markup'}
+
 olympics %>% skim_without_charts()
+
 
 ```
 
@@ -130,6 +133,25 @@ ggplot(counts_sex,aes(x=year,y=Count,fill=sex)) +
   geom_col() +
   coord_flip() 
 ```
+
+
+## who got the most medals 
+```{r}
+
+olympics %>% 
+  filter(!is.na(medal)) %>% 
+  group_by(name) %>% 
+  summarise(name , total = length(medal)) %>%  distinct() %>% 
+  arrange( desc(total)  ) %>%  head(10)  -> medalyPerson
+
+
+medalyPerson %>% 
+ggplot(aes(reorder(name,total) , total)) + geom_bar(stat =  "identity") +theme(axis.text.x = element_text(angle = 90)) + coord_flip()
+```
+
+
+
+
 
 ## changes of athletes' height,weight and BMI over time {.tabset}
 
@@ -341,6 +363,60 @@ scale_color_manual(values=c("gold1","gray70","gold4"))
 
 ```
 
+```{r}
+
+
+AgeAndHowManyGold <-
+  olympics %>%
+  group_by(year,age, medal) %>% 
+  filter(medal == "Gold",!is.na(age)) %>% 
+  summarise(count = n() ) 
+
+
+
+
+   medal <- olympics %>% 
+  group_by(year, medal) %>% 
+  
+  summarise(
+    age = mean(age, na.rm = TRUE ) ## i dont know whay na.rm do yet but when i remove it the graph change a lot
+    , season =season
+  )  
+
+
+   
+   AgeAndHowManyMedal <-
+     olympics %>%
+     group_by(year,age, medal) %>% 
+     filter(!is.na(medal),!is.na(age)) %>% 
+     summarise(count = n() ) 
+   
+
+
+```
+
+```{r}
+
+###--- plot for medal per year 
+
+ggplot(medal , aes(x=year , y= age  , color = medal )) + geom_line() +   facet_grid(. ~ season) #summer and winter game 
+
+
+
+```
+
+```{r}
+
+ggplot(AgeAndHowManyGold , aes(x=year ,age   ,size = count)) + geom_point()  ## this will show only gold medal 
+
+
+```
+
+```{r}
+
+ggplot(AgeAndHowManyMedal , aes(x=year ,age , color = medal  ,size = count)) +  geom_jitter(alpha = 0.8, shape = 16 , width =1) +
+  coord_fixed() + scale_color_brewer(palette = "BrBG") ## this will show ALL medal 
+```
 
 
 # Conclusion 

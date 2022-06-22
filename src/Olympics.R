@@ -10,6 +10,7 @@ library(tidyverse)
 library(skimr)
 library(rworldmap)
 library(repr)
+library(plotly)
 library(DT)
 # Download all data files
 tuesdata <- tidytuesdayR::tt_load("2021-07-27")
@@ -326,11 +327,11 @@ ggplot(aes(x= reorder(noc,count), y=count)) +
 medal <-
   olympics %>% 
   filter(!is.na(age),!is.na(medal)) %>% 
-  group_by(age, medal) %>% 
-  summarise(Count = n())
+  group_by(year, medal) %>% 
+  summarise(age = mean(age))
 
 #plot
-ggplot(medal , aes(age , y=Count, color = medal)) + geom_line() +
+ggplot(medal , aes(x=year , y=age, color = medal)) + geom_line() +
 scale_color_manual(values=c("gold1","gray70","gold4")) 
   
 

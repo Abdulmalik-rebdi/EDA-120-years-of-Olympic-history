@@ -1,0 +1,310 @@
+---
+title: "Olympics_EDA_Presentation "
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: row
+    vertical_layout: scroll
+    theme: united
+    code_folding: hide
+
+
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+#loading reqiuerd packages
+library(plyr)
+library(dplyr)
+library(tidyverse)
+library(skimr)
+library(rworldmap)
+library(repr)
+library(DT)
+library(janitor)
+library(GGally)
+library(here)
+library(kableExtra)
+library(tidytuesdayR)
+
+#import data 
+tuesdata <- tidytuesdayR::tt_load("2021-07-27")
+# Individual dataframes
+olympics <- tuesdata$olympics
+
+# A second dataframe is available
+# It is not required, but may prove useful in certain cases
+regions <- tuesdata$regions
+olympics$medal <- factor(olympics$medal,levels = c("Gold","Silver","Bronze"))
+olympics$season <- factor(olympics$season,levels = c("Summer","Winter"))
+olympics$sex <-  factor(olympics$sex,levels = c("M","F"))
+```
+
+# DATA 
+### Short description of the data
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+**The dataset contains the following variables:**
+
+
+| Variable | Type      | Description                                    |
+|----------|-----------|------------------------------------------------|
+| id       | double    | Athlete unique ID                              |
+| name     | character | Athlete Name                                   |
+| sex      | character | Athlete Sex                                    | 
+| age      | double    | Athlete Age                                    |
+| height   | double    | Athlete Height (cm)                            | 
+| weight   | double    | Athlete weight (kg)                            |
+| team     | character | Team name, typically a country name            |
+| noc      | character | NOC 3-letter country code                      |
+| games    | character | 4-digit year + season                          |
+| year     | double    | 4-digit year                                   | 
+| season   | character | Season                                         |
+| city     | character | Host city                                      | 
+| sport    | character | Sport                                          |
+| event    | character | Sport + Event Name                             |
+| medal    | character | Medal: Gold, Silver, Bronze, (plus NA values)  |
+
+
+**You can access the dataset directly from base package.**
+
+## Row 1 {data-height= 650}
+
+**The detailed summary for every type as follow**
+
+
+```{r}
+DT::datatable(olympics, 
+              rownames = FALSE, 
+              options = list(pageLength = 5, scrollX = TRUE), 
+              class = 'white-space: nowrap' )
+olympics %>% skim_without_charts()
+```
+
+
+# EDA
+How did the numbers of female and male athlete changed over time
+
+
+### Plot 1
+
+```{r, echo=FALSE}
+print("Hello")
+```
+
+
+### Plot 2
+
+**changes of athletes' height,weight and BMI over time**
+
+## changes of athletes' height,weight and BMI over time {.tabset}
+
+### Height
+```{r}
+olympics %>% 
+  filter(!is.na(height)) %>% 
+  group_by(year) %>% 
+  summarise( height= mean(height))-> avgHight
+
+ggplot(avgHight , aes(year , height)) + geom_point()+ geom_smooth(se = FALSE)
+```
+
+### Weight
+```{r}
+olympics %>% 
+  filter(!is.na(weight)) %>% 
+  group_by(year) %>% 
+  summarise( weight= mean(weight))-> avgWeight
+
+ggplot(avgWeight , aes(year , weight)) + geom_point()+ geom_smooth(se = FALSE)
+```
+
+### BMI
+
+```{r}
+avgBMI <- avgHight
+avgBMI$weight <- avgWeight$weight
+
+avgBMI <- avgBMI %>% 
+  mutate(bmi = (weight)/(height/100 * height/100))
+
+ggplot(avgBMI ,aes(year , bmi) )+ geom_point()+ geom_smooth(se = FALSE)
+```
+
+
+
+## Row 2
+
+### did WW1 and WW2 affect the number of participated countries ?
+
+**How did the Olympics suffer from the WWII**
+
+ 
+```{r, echo=FALSE}
+medal2 <-
+  olympics %>% 
+  group_by(year, medal = medal=="Gold" , season) %>% #the idea here is when we group by medal = gold this will show us the number of games (one medal per game)
+  
+  summarise(
+    TotalMedal = length(medal) ## i dont know whay na.rm do yet but when i remove it the graph change a lot
+  )
+
+
+medal2 %>% 
+  filter(medal , medal == TRUE)    ->medal ##the idea here is will count the number of true(medal == gold) in each year summer or 
+
+ggplot(medal , aes(year , TotalMedal  , color = season)) + geom_line() +
+  geom_point(aes(x=1920, y=470), size=30, shape=1, color="gold4") +
+  geom_point(aes(x=1945, y=300), size=30, shape=1, color="gold4") +
+  labs(title ="WWII & Olympcs " ,y = "Total Games", x = "YEAR of the event" , caption = "*the circles shows the start and the end of the war \n this also shows that the winter olympics started in the middle of the war  ") +
+  # please change the title to good name
+  theme_bw() + theme(legend.position = c(.05,.92) , )
+```
+
+## Row
+
+### Germany in wrold war 2 
+
+
+
+
+```{r}
+olympics %>% 
+  group_by(team , year ) %>% 
+  filter(grepl("Germany", team)) %>% 
+  
+  # filter(team == "Germany" | team == "*Germany" ) %>% 
+  summarise( team , year , numberOfParticipants= length(name) ,season) %>% 
+  distinct() -> GermanyDataset
+
+GermanyDataset  %>% 
+  ggplot(aes(year ,numberOfParticipants , color = team )) + geom_bar(stat = "identity")+ ##  I dont like this plot but  
+  
+  facet_grid(. ~ season) +
+  labs(title = "Germany during WWII era" , caption = " between 1920 to 1945 Germany have not played any olympics except 3   ") 
+
+```
+
+## Row 2
+
+### **Does the age of the athlete effect on his/her performance?**
+*The avg age in each year*
+
+```{r}
+olympics %>% 
+  select(year , team,age) %>%
+  filter(!is.na(age)) %>% 
+  group_by(year) %>% 
+  summarise(age = mean(age)) -> avrgAgeInEachYear 
+
+ggplot(avrgAgeInEachYear , aes(year , age)) + geom_point()+ geom_smooth(se = FALSE)
+
+winnersVslosers <- olympics %>% 
+  mutate(winner = if_else(is.na(medal),"loser","winner"))
+```
+
+### **How old are most of the winners and losers?**
+
+```{r}
+winnersVslosers$winner <- factor(winnersVslosers$winner,levels = c("loser","winner")) 
+
+winnersVslosers %>%
+  filter(!is.na(age)) %>% 
+  group_by(winner,age) %>% 
+  summarise(count=n()) -> winnersVslosers
+
+#plot
+winnersVslosers %>% 
+  ggplot(aes(x=age ,fill= winner)) +
+  geom_density(alpha=0.25)
+```
+
+## Row 
+### Top 10 teams with respect to number of medals
+```{r}
+# count number of medals for each team
+medal_counts <- olympics %>% filter(!is.na(medal))%>%
+  group_by(team, medal) %>%
+  summarize(Count=length(medal))
+
+# order team by total medal count
+levs_art <- medal_counts %>%
+  group_by(team) %>%
+  summarize(Total=sum(Count)) %>%
+  arrange(Total) %>%
+  select(team) %>% 
+  tail(n=20)
+
+medal_counts$team <- factor(medal_counts$team, levels=levs_art$team)
+medal_counts <- medal_counts %>% filter(!is.na(team))
+
+
+# plot
+ggplot(medal_counts, aes(x=team, y=Count, fill=medal)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_manual(values=c("gold1","gray70","gold4")) +
+  theme(plot.title = element_text(hjust = 0.5))+
+  labs(x="Team",y="Number of Medals athletes since 1896")
+```
+
+### With respect with medal type *(gold , silver ,bronze)*
+```{r}
+medal_countsALL <- olympics %>% filter(!is.na(medal))%>%
+  group_by(team) %>%
+  summarize(Count = length(medal)) 
+
+medal_countsALL <- medal_countsALL[order(medal_countsALL$Count, decreasing = TRUE), ] %>% head(10)
+
+ggplot(medal_countsALL , aes(Count , team )) + geom_bar(stat =  "identity")
+```
+
+## Row 
+
+### **Number of athletes per countery**
+```{r}
+olympics %>%
+  group_by(noc) %>%
+  count(name) %>%
+  summarise(count = sum(n)) %>% 
+  arrange(count) %>% 
+  tail(n=20) %>% 
+  
+#plot
+ggplot(aes(x= reorder(noc,count), y=count)) +
+ geom_col() +
+ coord_flip() +
+ labs(x="Team",y="Number of Olympics athletes since 1896")
+
+```
+
+## Row
+### Mean of age in year With respect of kind of model 
+
+```{r}
+medal <-
+  olympics %>% 
+  filter(!is.na(age),!is.na(medal)) %>% 
+  group_by(year, medal) %>% 
+  summarise(age = mean(age))
+
+#plot
+ggplot(medal , aes(x=year , y=age, color = medal)) + geom_line() +
+scale_color_manual(values=c("gold1","gray70","gold4")) 
+  
+
+
+
+```
+
+
+# Problems and challenges you’ve encountered
+**blank**
+
+***Winter and Summer Games were held in the same year up until 1992. After that, they staggered them such that Winter Games occur on a four year cycle starting with 1994, then Summer in 1996, then Winter in 1998, and so on.***
+
+***How to decide which plots should be presented***
+
+# Key Takeaways from the dataset backed by visualizations and/or tables

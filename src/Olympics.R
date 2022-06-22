@@ -374,5 +374,35 @@ medal <-
 #plot
 ggplot(medal , aes(x=year , y=age, color = medal)) + geom_line() +
 scale_color_manual(values=c("gold1","gray70","gold4")) 
+
+#---------- 
+### this will show the first femail winner
+#there are 3 winner in 1900
+olympics %>%
+  filter(sex == "F" , medal =="Gold" ) %>%
+  arrange(year)
+### the number of noc
+### usa has 6
+olympics %>%
+  filter(year == 1904 , sex == "F") %>%
+  distinct(name , .keep_all= TRUE) %>%
+  group_by(noc) %>%
+  summarise(noc ,length(medal) ) %>%
+  distinct()
+### but in 1908
+### there 39 female participent
+olympics %>%
+  filter(year == 1908 , sex == "F") %>%
+  distinct(name , .keep_all= TRUE) %>%
+  group_by(noc) %>%
+  summarise(noc ,length(medal) ) %>%
+  distinct()
+## this will show the number of participent in 2016 (F/M)
+# there are 6223 F and 7465male meaning 45% are women
+olympics %>%
+  filter(year == 2016) %>%
+  group_by(sex) %>%
+  summarise(sex , length(id)) %>%
+  distinct()
   
 

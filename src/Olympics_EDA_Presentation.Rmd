@@ -224,20 +224,20 @@ and they start to increase again. before that the plot shows that the athlete te
 ```{r}
 olympics %>% 
   filter(!is.na(height)) %>% 
-  group_by(year) %>% 
+  group_by(year , sex) %>% 
   summarise( height= mean(height))-> avgHight
 
-ggplot(avgHight , aes(year , height)) + geom_point()+ geom_smooth(se = FALSE)
+ggplot(avgHight , aes(year , height , color = sex)) + geom_point()+ geom_smooth(se = FALSE)
 ```
 
 ### Weight
 ```{r}
 olympics %>% 
   filter(!is.na(weight)) %>% 
-  group_by(year) %>% 
+  group_by(year , sex) %>% 
   summarise( weight= mean(weight))-> avgWeight
 
-ggplot(avgWeight , aes(year , weight)) + geom_point()+ geom_smooth(se = FALSE)
+ggplot(avgWeight , aes(year , weight , color= sex)) + geom_point()+ geom_smooth(se = FALSE)
 ```
 
 ### BMI
@@ -249,7 +249,7 @@ avgBMI$weight <- avgWeight$weight
 avgBMI <- avgBMI %>% 
   mutate(bmi = (weight)/(height/100 * height/100))
 
-ggplot(avgBMI ,aes(year , bmi) )+ geom_point()+ geom_smooth(se = FALSE)
+ggplot(avgBMI ,aes(year , bmi , color = sex) )+ geom_point()+ geom_smooth(se = FALSE)
 ```
 
 ### age 

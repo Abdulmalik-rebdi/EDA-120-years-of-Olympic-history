@@ -320,7 +320,7 @@ This shows the number of Participants in each olympics we can see that in the wa
 ```{r}
 olympics %>% 
   group_by(team , year ) %>% 
-  filter(grepl("Germany", team)) %>% 
+  filter(grepl("Germany", team ,season)) %>% 
   
   # filter(team == "Germany" | team == "*Germany" ) %>% 
   summarise( team , year , numberOfParticipants= length(name) ,season) %>% 

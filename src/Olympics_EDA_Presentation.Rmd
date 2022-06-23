@@ -314,7 +314,7 @@ before the war until 1967
 
 ```{r}
 olympics %>%
-  group_by(team , year ) %>%
+  group_by(team , year , season ) %>%
   filter(grepl("Germany", team)) %>%
   # filter(team == "Germany" | team == "*Germany" ) %>%
   summarise( team , year , numberOfParticipants= length(name) ,season) %>%

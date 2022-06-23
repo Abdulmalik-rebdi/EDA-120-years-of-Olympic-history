@@ -402,7 +402,13 @@ olympics %>%
 olympics %>%
   filter(year == 2016) %>%
   group_by(sex) %>%
-  ئذsummarise(sex , length(id)) %>%
+  summarise(sex , length(id)) %>%
   distinct()
-  
+#---- Germany and war
+olympics %>%
+  group_by(team, year , season) %>%
+  summarise(year, Number = length(year) , season ) %>%
+  distinct() %>%
+  filter(team == "Germany") %>% 
+  arrange(desc(Number))
 

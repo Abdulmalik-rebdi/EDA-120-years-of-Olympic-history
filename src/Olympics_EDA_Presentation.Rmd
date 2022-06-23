@@ -4,10 +4,10 @@ output:
   flexdashboard::flex_dashboard:
     orientation: row
     vertical_layout: scroll
-
 ---
 
 ```{r setup, include=FALSE}
+install.packages("flexdashboard")
 library(flexdashboard)
 #loading reqiuerd packages
 library(plyr)
@@ -35,70 +35,64 @@ olympics$medal <- factor(olympics$medal,levels = c("Gold","Silver","Bronze"))
 olympics$season <- factor(olympics$season,levels = c("Summer","Winter"))
 olympics$sex <-  factor(olympics$sex,levels = c("M","F"))
 ```
-# Olympics 
-<br>
-**EDA analysis of the Olypics games**
-<br> 
-*By* 
-<br>
-Mohammed Darwish, Salman Al-Harbi, Amal alghamdi, Abdulmalik Alrebdi
+
+# Olympics
+
+<br> **EDA analysis of the Olypics games** <br> *By* <br> Mohammed Darwish, Salman Al-Harbi, Amal alghamdi, Abdulmalik Alrebdi
 
 **Content**
 
-1. DATA 
-2. EDA
-3. Problems and challenges 
-4. Key takeaways
+1.  DATA
+2.  EDA
+3.  Problems and challenges
+4.  Key takeaways
 
-# DATA 
+# DATA
+
 ### Short description of the data
+
 This is a historical dataset on the modern Olympic Games, including all the Games from Athens 1896 to Rio 2016, featuring summer and winter sports competitions in which thousands of athletes from around the world participate in a variety of competitions dataset contains 271116 rows and 15 columns. The Olympics is more than just a quadrennial multi-sport world championship. It is a lens through which to understand global history. goals is to shed light on major patterns in Olympic history. How many athletes, sports, and nations are there? Where do most athletes come from? Who wins medals?
 
 **The dataset contains the following variables:**
 
-
-| Variable | Type      | Description                                    |
-|----------|-----------|------------------------------------------------|
-| id       | double    | Athlete unique ID                              |
-| name     | character | Athlete Name                                   |
-| sex      | character | Athlete Sex                                    | 
-| age      | double    | Athlete Age                                    |
-| height   | double    | Athlete Height (cm)                            | 
-| weight   | double    | Athlete weight (kg)                            |
-| team     | character | Team name, typically a country name            |
-| noc      | character | NOC 3-letter country code                      |
-| games    | character | 4-digit year + season                          |
-| year     | double    | 4-digit year                                   | 
-| season   | character | Season                                         |
-| city     | character | Host city                                      | 
-| sport    | character | Sport                                          |
-| event    | character | Sport + Event Name                             |
-| medal    | character | Medal: Gold, Silver, Bronze, (plus NA values)  |
-
+| Variable | Type      | Description                                   |
+|----------|-----------|-----------------------------------------------|
+| id       | double    | Athlete unique ID                             |
+| name     | character | Athlete Name                                  |
+| sex      | character | Athlete Sex                                   |
+| age      | double    | Athlete Age                                   |
+| height   | double    | Athlete Height (cm)                           |
+| weight   | double    | Athlete weight (kg)                           |
+| team     | character | Team name, typically a country name           |
+| noc      | character | NOC 3-letter country code                     |
+| games    | character | 4-digit year + season                         |
+| year     | double    | 4-digit year                                  |
+| season   | character | Season                                        |
+| city     | character | Host city                                     |
+| sport    | character | Sport                                         |
+| event    | character | Sport + Event Name                            |
+| medal    | character | Medal: Gold, Silver, Bronze, (plus NA values) |
 
 **You can access the dataset directly from base package.**
 
-## Row 1 {data-height=1000, .tabset}
+## Row 1 {.tabset data-height="1000,"}
 
-### **The detailed summary for every type as follow** 
-
+### **The detailed summary for every type as follow**
 
 ```{r}
 olympics %>% skimr::skim() 
 
 ```
 
-
 # EDA
 
-## Row {data-height=350}
+## Row {data-height="350"}
 
-### Findings 
+### Findings
 
 The US has the highest number of medals this may be a result of the high population, the diversity, which enables them to have more options in each sport and have a high number of athletes as we can see in 2.1.6
 
 ### **Top 20 teams with respect to number of medals**
-
 
 ```{r}
 medal_counts <- olympics %>% filter(!is.na(medal))%>%
@@ -129,6 +123,7 @@ ggplot(medal_counts, aes(x=team, y=Count, fill=medal)) +
 ## Row
 
 ### Number of athletes per countery
+
 ```{r}
 olympics %>%
   group_by(noc) %>%
@@ -146,6 +141,7 @@ ggplot(aes(x= reorder(noc,count), y=count)) +
 ```
 
 ### who got the most medals
+
 ```{r}
 olympics %>% 
   filter(!is.na(medal)) %>% 
@@ -158,12 +154,14 @@ medalyPerson %>%
 ggplot(aes(reorder(name,total) , total)) + geom_bar(stat =  "identity") +theme(axis.text.x = element_text(angle = 90)) + coord_flip()
 ```
 
-## Row 3 {data-height=350}
+## Row 3 {data-height="350"}
 
-### Findings 
+### Findings
+
 Interest NOCs are leading the way for gender equality in the Olympics,so some NOCs even sent a majority of female athletes to the Games ,In 1996 and 2016. The chart shows asimprovement in female participation from 1956 to 2016 .
 
 ### know lets take a look if number of female athlete has increased since 1897 and if did why ?
+
 ```{r}
 #count the number of females and males for each year
 counts_sex <- olympics %>% 
@@ -192,35 +190,20 @@ ggplot(counts_sex,aes(x=year,y=Count,fill=sex)) +
   coord_flip() 
 ```
 
-## Row {data-height=150}
+## Row {data-height="150"}
 
-<br>
-<br>
-<br>
-<br>
-<br>
+<br> <br> <br> <br> <br>
 
-### Findings 
+### Findings
 
-**changes of athletes' height,weight and BMI over time**
-height, weight has a similar trend as the reach the minimum point between 1950-1960 
-and they start to increase again. before that the plot shows that the athlete tend to have lower weights, the decrease in the weight is higher and faster than the height. since the events are changing constantly overall this plot implies that the new events require high height and weight.\
+**changes of athletes' height,weight and BMI over time** height, weight has a similar trend as the reach the minimum point between 1950-1960 and they start to increase again. before that the plot shows that the athlete tend to have lower weights, the decrease in the weight is higher and faster than the height. since the events are changing constantly overall this plot implies that the new events require high height and weight.\
 
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-
-
+<br> <br> <br> <br> <br> <br> <br> <br>
 
 ## changes of athletes' height,weight and BMI over time {.tabset}
 
-
 ### Height
+
 ```{r}
 olympics %>% 
   filter(!is.na(height)) %>% 
@@ -231,6 +214,7 @@ ggplot(avgHight , aes(year , height)) + geom_point()+ geom_smooth(se = FALSE)
 ```
 
 ### Weight
+
 ```{r}
 olympics %>% 
   filter(!is.na(weight)) %>% 
@@ -252,7 +236,7 @@ avgBMI <- avgBMI %>%
 ggplot(avgBMI ,aes(year , bmi) )+ geom_point()+ geom_smooth(se = FALSE)
 ```
 
-### age 
+### age
 
 ```{r}
 olympics %>%
@@ -268,18 +252,14 @@ ggplot(artAge, aes(year, age)) +
                fun.args = list(mult = 1))
 ```
 
+## Row 3 {data-height="350"}
 
+### Findings
 
-## Row 3 {data-height=350}
-
-### Findings 
-XXXXXXXXXXXXX
-xxxxxxxxxxxxxxxxxxxxxxxxxxx
+XXXXXXXXXXXXX xxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ### **Did WW2 affect the number of participated countries ?**
 
-
- 
 ```{r, echo=FALSE}
 medal2 <-
   olympics %>%
@@ -296,16 +276,13 @@ ggplot(medal , aes(year , TotalMedal  , color = season)) + geom_line() +
   theme_bw() + theme(legend.position = c(.09,.85) , )
 ```
 
-## Row 3 {data-height=350}
+## Row 3 {data-height="350"}
 
-### Findings 
-XXXXXXXXXXXXXXXXXXX
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+### Findings
+
+XXXXXXXXXXXXXXXXXXX xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ### **Germany in wrold war 2**
-
-
-
 
 ```{r}
 olympics %>%
@@ -321,17 +298,20 @@ GermanyDataset  %>%
 
 ```
 
+## Row 3 {data-height="100"}
+
+### <b><font size="20em"> Does the age of the athlete effect on his/her performance?</font></b>
+
+<font size="6em">as we know older people elders are worse in sports than younger, but does this fact also apply on Olympic athlete ? </font>
+
+## Row 3 {data-height="500"}
+
+### <b><font size="4em">Findings</font></b> {data-width="400"}
+
+<font size="4em">in this plot we can see the average age of Olympic athlete since 1897 to 2016,an we can see that mean of age increses between 1912 and 1948, this doesn't mean their generation was stronger or they were eating healthy this is acullty in those years there was a few events that allows elders to participate and win e.g. art competition.</font>
 
 
-## Row 3 {data-height=350}
-
-### Findings 
-
-xxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-### **Does the age of the athlete effect on his/her performance?**
-*The avg age in each year*
+### <b><font size="4em">The averege age in each year</font></b>
 
 ```{r}
 olympics %>% 
@@ -345,12 +325,19 @@ ggplot(avrgAgeInEachYear , aes(year , age)) + geom_point()+ geom_smooth(se = FAL
 winnersVslosers <- olympics %>% 
   mutate(winner = if_else(is.na(medal),"loser","winner"))
 ```
-### Findings 
 
-xxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+## Row 3 {data-height="500"}
 
-### How old are most of the winners and losers?
+
+
+### <b><font size="4em">Findings</font></b> {data-width="400"}
+
+<font size="4em">this plot tells us the density of elder losers is actually higher the the density of elder winners ,so this means yes younger actually have more wining possibility than elders.</font>
+
+
+
+### <b><font size="4em">How old are most of the winners and losers?</font></b>
+
 ```{r}
 winnersVslosers$winner <- factor(winnersVslosers$winner,levels = c("loser","winner")) 
 
@@ -367,13 +354,14 @@ winnersVslosers %>%
 
 ## Row 3
 
-### Findings 
-xxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+### <b><font size="4em">Findings</font></b>
+
+xxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ## Row
 
-### Mean of age in year With respect of kind of model
+### <b><font size="4em">Mean of age in year With respect of kind of model</font></b>
+
 ```{r}
 medal <-
   olympics %>% 
@@ -386,61 +374,53 @@ ggplot(medal , aes(x=year , y=age, color = medal)) + geom_line() +
 scale_color_manual(values=c("gold1","gray70","gold4")) 
 ```
 
-## Row 3 {data-height=150}
+## Row 3 {data-height="150"}
 
-### Findings 
+### <b><font size="4em">Findings</font></b>
 
-xxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxXXXXXXXXXXXXXXxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxx
+<font size="4em">this table shows kids who have won an Olympic medal and what events they won in, it tells us that kids have more possibility to win a medal if they were within Gymnastics events.</font>
 
-## Row 3 {data-height=650}
 
-### kids who got Olympics models(less than 13)
+## Row 3 {data-height="650"}
+
+### <b><font size="4em">kids who got Olympics models(less than 13)</font></b>
+
 ```{r}
 olympics %>% 
   filter(age<13, !is.na(medal)) %>% 
   select(-year,-season) %>% 
   arrange(desc(age)) %>%
-  head(5) %>%
-  knitr::kable()
-
+  head(5) %>% 
+  datatable(height = 600)
 ```
 
-## Row 3 {data-height=150}
+## Row 3 {data-height="150"}
 
-### Findings 
+### <b><font size="4em">Findings</font></b>
 
-xxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxXXXXXXXXXXXXXXxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxx
+<font size="4em">this table shows elders who have won an Olympic medal and what events they won in, it tells us that elders have more possibility to win a medal if they were within Art events but unfortunately they stopped a long time ago.</font>
 
-## Row 3 {data-height=1000}
 
-### kids who got Olympics models(less than 13)
+## Row 3 {data-height="1000"}
+<style type="text/css">
+
+.dataTables_wrapper .dataTables_scroll div.dataTables_scrollBody {  
+  overflow: visible   
+
+</style>
+### <b><font size="4em">elders who got Olympics models(above 65)</font></b>
+
 ```{r}
 olympics %>%
   filter(age>65, !is.na(medal)) %>%
   select(-year,-season) %>% 
   arrange(desc(age)) %>%
   head(5) %>%
-  knitr::kable() 
+  datatable(height = 203)
 ```
 
+# Problems and challenges
 
-# Problems and challenges 
+***Winter and Summer Games were held in the same year up until 1992. After that, they staggered them such that Winter Games occur on a four year cycle starting with 1994, then Summer in 1996, then Winter in 1998, and so on.*** <br> ***How to decide which plots should be presented*** <br> **There are only a few events that happened every year so it is hard to evaluate the attributes of the athlete without deep analysis** <br> **Using git we had some issues in pushing and pulling the content and how we organize our work** <br> **In the early years, there is a lot of missing data**
 
-***Winter and Summer Games were held in the same year up until 1992. After that, they staggered them such that Winter Games occur on a four year cycle starting with 1994, then Summer in 1996, then Winter in 1998, and so on.***
-<br>
-***How to decide which plots should be presented***
-<br>
-**There are only a few events that happened every year so it is hard to evaluate the attributes of the athlete without deep analysis**
-<br> 
-**Using git we had some issues in pushing and pulling the content and how we organize our work**
-<br>
-**In the early years, there is a lot of missing data**
-
-
-# Key Takeaways from the dataset 
+# Key Takeaways from the dataset

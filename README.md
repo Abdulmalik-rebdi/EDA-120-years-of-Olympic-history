@@ -1,1 +1,4 @@
 # EDA-120-years-of-Olympic-history
+This is a historical dataset on the modern Olympic Games, including all the Games from Athens 1896 to Rio 2016, featuring summer and winter sports competitions in which thousands of athletes from around the world participate in a variety of competitions dataset contains 271116 rows
+and 15 columns. The Olympics is more than just a quadrennial multi-sport world championship. It is a lens through which to understand global history. goals is to shed light on major patterns in Olympic history.How many athletes, sports, and nations are there? Where do most athletes
+come from? Who wins medals?

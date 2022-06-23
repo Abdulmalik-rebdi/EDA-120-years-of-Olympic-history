@@ -92,6 +92,8 @@ olympics %>%
   summarise(mean = mean(age))
 ```
 ## how did the numbers of female and male athlete changed over time
+
+Interest NOCs are leading the way for gender equality in the Olympics,so some NOCs even sent a majority of female athletes to the Games ,In 1996 and 2016. The chart shows asimprovement in female participation from 1956 to 2016 .
 ```{r}
 #count the number of females and males for each year
 counts_sex <- olympics %>% 
@@ -315,7 +317,7 @@ ggplot(aes(x= reorder(noc,count), y=count)) +
 
 ## Mean of age in year With respect of kind of model 
 
-```{r}
+```{r, echo=FALSE}
 medal <-
   olympics %>% 
   filter(!is.na(age),!is.na(medal)) %>% 
@@ -326,8 +328,6 @@ medal <-
 ggplot(medal , aes(x=year , y=age, color = medal)) + geom_line() +
 scale_color_manual(values=c("gold1","gray70","gold4")) 
   
-
-
 
 ```
 

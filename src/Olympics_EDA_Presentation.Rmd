@@ -446,7 +446,6 @@ of missing data**
 ***The US has the highest number of medals and athletes.***<br>
 ***Brazil has the highest number of medals in football.***<br>
 ***Female participation in the Olympic Games is on the rise.***<br>
-***The size of Olympians have become more extreme over time. ***<br>
-***In most sports this means taller and heavier, but in a few sports such as gymnastics, athletes have become smaller.***<br>
+***The size of Olympians have become more extreme over time in most sports this means taller and heavier, but in a few sports such as gymnastics, athletes have become smaller.***<br>
 ***The proportion of winners athletes with ages below 60 is higher than that above 60.***<br>
 ***The Olympic Games plays a vital role in fostering unity among nations.***<br>

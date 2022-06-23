@@ -1,25 +1,6 @@
-<<<<<<< HEAD
-library(tidyverse)
-library(janitor)
-library(GGally)
-library(here)
-library(kableExtra)
-library(tidytuesdayR)
 
 
-
-tuesdata <- tidytuesdayR::tt_load("2021-07-27")
-
-olympics <- tuesdata$olympics
-regions <- tuesdata$regions  #It is not required, but may prove useful in certain cases
-
-# olympics %>% 
-#   clean_names() -> olympics
-
-glimpse(olympics)
-summary(olympics)
-
-
+# -----------------??-----------------------
 counts_NOC <- olympics %>% filter(year %in% c(1936,1956,1976,1996,2016)) %>%
   group_by(year, noc, sex) %>%
   summarize(Count = length(unique(id))) %>%
@@ -27,7 +8,7 @@ counts_NOC <- olympics %>% filter(year %in% c(1936,1956,1976,1996,2016)) %>%
   mutate(Total = sum(M,F,na.rm=T)) %>%
   filter(Total > 49) 
 names(counts_NOC)[3:4] <- c("Male","Female")
-counts_NOC$Male[is.na(counts_NOC$Male)] <- 0
+
 counts_NOC$Female[is.na(counts_NOC$Female)] <- 0
 counts_NOC$year <- as.factor(counts_NOC$year)
 
@@ -50,10 +31,10 @@ olympics %>% group_by(name , team) %>%
   scale_color_manual(values=c("darkblue","red"))  +
   theme(plot.title = element_text(hjust = 0.5)) +
   labs(title="Height/Weight data completeness from each Olympiad")
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
-=======
 # Install & loading packages
+install.packages("kableExtra", dependencies = TRUE)
 install.packages("tidytuesdayR")
 install.packages("plyr", dependencies = TRUE)
 install.packages("rworldmap", dependencies = TRUE)
@@ -65,8 +46,12 @@ library(tidyverse)
 library(skimr)
 library(rworldmap)
 library(repr)
-library(plotly)
 library(DT)
+library(janitor)
+library(GGally)
+library(here)
+library(kableExtra)
+library(tidytuesdayR)
 # Download all data files
 tuesdata <- tidytuesdayR::tt_load("2021-07-27")
 
@@ -94,6 +79,7 @@ olympics %>% skim_without_charts()
 olympics %>% 
   select(sex,age,height,weight,year,season,medal)%>% 
   summary()
+
 
 #list of all sports Olympics did cover since 1896?
 olympics %>% 
@@ -388,12 +374,35 @@ medal <-
 #plot
 ggplot(medal , aes(x=year , y=age, color = medal)) + geom_line() +
 scale_color_manual(values=c("gold1","gray70","gold4")) 
+
+#---------- 
+### this will show the first femail winner
+#there are 3 winner in 1900
+olympics %>%
+  filter(sex == "F" , medal =="Gold" ) %>%
+  arrange(year)
+### the number of noc
+### usa has 6
+olympics %>%
+  filter(year == 1904 , sex == "F") %>%
+  distinct(name , .keep_all= TRUE) %>%
+  group_by(noc) %>%
+  summarise(noc ,length(medal) ) %>%
+  distinct()
+### but in 1908
+### there 39 female participent
+olympics %>%
+  filter(year == 1908 , sex == "F") %>%
+  distinct(name , .keep_all= TRUE) %>%
+  group_by(noc) %>%
+  summarise(noc ,length(medal) ) %>%
+  distinct()
+## this will show the number of participent in 2016 (F/M)
+# there are 6223 F and 7465male meaning 45% are women
+olympics %>%
+  filter(year == 2016) %>%
+  group_by(sex) %>%
+  ئذsummarise(sex , length(id)) %>%
+  distinct()
   
 
-
-
-<<<<<<< HEAD
- 
->>>>>>> e4ec7c19c67b5b7bb14fab185622ca0451252d2d
-=======
->>>>>>> 5be2aa8f2ff6cf29b28aaee34b7230df55297136

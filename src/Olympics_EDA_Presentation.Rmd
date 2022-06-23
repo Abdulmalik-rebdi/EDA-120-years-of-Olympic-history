@@ -1,0 +1,452 @@
+---
+title: "Olympics_EDA_Presentation "
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: row
+    vertical_layout: scroll
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+#loading reqiuerd packages
+library(plyr)
+library(dplyr)
+library(tidyverse)
+library(skimr)
+library(rworldmap)
+library(repr)
+library(DT)
+library(janitor)
+library(GGally)
+library(here)
+library(kableExtra)
+library(tidytuesdayR)
+
+#import data 
+tuesdata <- tidytuesdayR::tt_load("2021-07-27")
+# Individual dataframes
+olympics <- tuesdata$olympics
+
+# A second dataframe is available
+# It is not required, but may prove useful in certain cases
+regions <- tuesdata$regions
+olympics$medal <- factor(olympics$medal,levels = c("Gold","Silver","Bronze"))
+olympics$season <- factor(olympics$season,levels = c("Summer","Winter"))
+olympics$sex <-  factor(olympics$sex,levels = c("M","F"))
+```
+
+# Olympics
+
+<br> **EDA analysis of the Olypics games** <br> *By* <br> Mohammed
+Darwish, Salman Al-Harbi, Amal alghamdi, Abdulmalik Alrebdi
+
+**Content**
+
+1.  DATA
+2.  EDA
+3.  Problems and challenges
+4.  Key takeaways
+
+# DATA
+
+### Short description of the data
+
+This is a historical dataset on the modern Olympic Games, including all
+the Games from Athens 1896 to Rio 2016, featuring summer and winter
+sports competitions in which thousands of athletes from around the world
+participate in a variety of competitions dataset contains 271116 rows
+and 15 columns. The Olympics is more than just a quadrennial multi-sport
+world championship. It is a lens through which to understand global
+history. goals is to shed light on major patterns in Olympic history.
+How many athletes, sports, and nations are there? Where do most athletes
+come from? Who wins medals?
+
+**The dataset contains the following variables:**
+
+| Variable | Type      | Description                                   |
+|----------|-----------|-----------------------------------------------|
+| id       | double    | Athlete unique ID                             |
+| name     | character | Athlete Name                                  |
+| sex      | character | Athlete Sex                                   |
+| age      | double    | Athlete Age                                   |
+| height   | double    | Athlete Height (cm)                           |
+| weight   | double    | Athlete weight (kg)                           |
+| team     | character | Team name, typically a country name           |
+| noc      | character | NOC 3-letter country code                     |
+| games    | character | 4-digit year + season                         |
+| year     | double    | 4-digit year                                  |
+| season   | character | Season                                        |
+| city     | character | Host city                                     |
+| sport    | character | Sport                                         |
+| event    | character | Sport + Event Name                            |
+| medal    | character | Medal: Gold, Silver, Bronze, (plus NA values) |
+
+**You can access the dataset directly from base package.**
+
+## Row 1 {.tabset data-height="1000,"}
+
+### **The detailed summary for every type as follow**
+
+```{r}
+olympics %>% skimr::skim() 
+
+```
+
+# EDA
+
+## Row {data-height="350"}
+
+### Findings
+
+The US has the highest number of medals this may be a result of the high
+population, the diversity, which enables them to have more options in
+each sport and have a high number of athletes as we can see in 2.1.6
+
+### **Top 20 teams with respect to number of medals**
+
+```{r}
+medal_counts <- olympics %>% filter(!is.na(medal))%>%
+  group_by(team, medal) %>%
+  summarize(Count=length(medal))
+
+# order team by total medal count
+levs_art <- medal_counts %>%
+  group_by(team) %>%
+  summarize(Total=sum(Count)) %>%
+  arrange(Total) %>%
+  select(team) %>% 
+  tail(n=20)
+
+medal_counts$team <- factor(medal_counts$team, levels=levs_art$team)
+medal_counts <- medal_counts %>% filter(!is.na(team))
+
+
+# plot
+ggplot(medal_counts, aes(x=team, y=Count, fill=medal)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_manual(values=c("gold1","gray70","gold4")) +
+  theme(plot.title = element_text(hjust = 0.5))+
+  labs(x="Team",y="Number of Medals athletes since 1896")
+```
+
+## Row
+
+### Number of athletes per countery
+
+```{r}
+olympics %>%
+  group_by(noc) %>%
+  count(name) %>%
+  summarise(count = sum(n)) %>% 
+  arrange(count) %>% 
+  tail(n=20) %>% 
+  
+#plot
+ggplot(aes(x= reorder(noc,count), y=count)) +
+ geom_col() +
+ coord_flip() +
+ labs(x="Team",y="Number of Olympics athletes since 1896")
+
+```
+
+### who got the most medals
+
+```{r}
+olympics %>% 
+  filter(!is.na(medal)) %>% 
+  group_by(name) %>% 
+  summarise(name , total = length(medal)) %>%  distinct() %>% 
+  arrange( desc(total)  ) %>%  head(10)  -> medalyPerson
+
+
+medalyPerson %>% 
+ggplot(aes(reorder(name,total) , total)) + geom_bar(stat =  "identity") +theme(axis.text.x = element_text(angle = 90)) + coord_flip()
+```
+
+## Row 3 {data-height="350"}
+
+### Findings
+
+Interest NOCs are leading the way for gender equality in the Olympics,so
+some NOCs even sent a majority of female athletes to the Games ,In 1996
+and 2016. The chart shows asimprovement in female participation from
+1956 to 2016 .
+
+### know lets take a look if number of female athlete has increased since 1897 and if did why ?
+
+```{r}
+#count the number of females and males for each year
+counts_sex <- olympics %>% 
+  group_by(year, sex) %>%
+  summarize(Count = length(unique(id))) %>%
+  spread(sex, Count)
+
+#clean the data
+counts_sex$M[is.na(counts_sex$M)] <- 0
+counts_sex$F[is.na(counts_sex$F)] <- 0
+counts_sex$year <- as.factor(counts_sex$year)
+
+#calculate the total on participants 
+counts_sex <- mutate(counts_sex,Total = sum(M,F,na.rm=T)) 
+
+#calculate the percentage of females and males from the total
+counts_sex$M <- counts_sex$M/counts_sex$Total
+counts_sex$F <- counts_sex$F/counts_sex$Total
+
+#creating the graph
+names(counts_sex)[2:3] <- c("Male","Female")
+counts_sex <- gather(counts_sex,key= sex , value = Count,2:3)
+
+ggplot(counts_sex,aes(x=year,y=Count,fill=sex)) +
+  geom_col() +
+  coord_flip() 
+```
+
+## Row {data-height="150"}
+
+<br> <br> <br> <br> <br>
+
+### Findings
+
+**changes of athletes' height,weight and BMI over time** height, weight
+has a similar trend it started increase from 1965 and before that the
+plot shows that the athlete tend to have lower weights, they might
+thought that decrease in the weight would be better . one thing to
+notice is that before 1950 there were lots of events that did not need
+athlete such as art which might affect the result .\
+
+<br> <br> <br> <br> <br> <br> <br> <br>
+
+## changes of athletes' height,weight and BMI over time {.tabset}
+
+### Height
+
+```{r}
+olympics %>% 
+  filter(!is.na(height)) %>% 
+  group_by(year , sex) %>% 
+  summarise( height= mean(height))-> avgHight
+
+ggplot(avgHight , aes(year , height , color = sex)) + geom_point()+ geom_smooth(se = FALSE)
+```
+
+### Weight
+
+```{r}
+olympics %>% 
+  filter(!is.na(weight)) %>% 
+  group_by(year , sex) %>% 
+  summarise( weight= mean(weight))-> avgWeight
+
+ggplot(avgWeight , aes(year , weight , color= sex)) + geom_point()+ geom_smooth(se = FALSE)
+```
+
+### BMI
+
+```{r}
+avgBMI <- avgHight
+avgBMI$weight <- avgWeight$weight
+
+avgBMI <- avgBMI %>% 
+  mutate(bmi = (weight)/(height/100 * height/100))
+
+ggplot(avgBMI ,aes(year , bmi , color = sex) )+ geom_point()+ geom_smooth(se = FALSE)
+```
+
+### Example
+
+```{r}
+olympics %>%
+  filter(grepl('Art', sport)) ->artAge
+artAge %>%
+  group_by(year) %>%
+  summarise(year, age) %>%
+ filter(!is.na(age)) ->artAge
+
+ggplot(artAge, aes(year, age)) +
+  geom_jitter(width = 0.2, alpha = 0.1, shape = 16) +
+  stat_summary(fun.data = mean_sdl,
+               fun.args = list(mult = 1))
+```
+
+## Row 3 {data-height="350"}
+
+### Findings
+
+this shows that the number of Games decrease in the beginning of WWII
+and then it increases dynamically after almost 5 years
+
+### **Did WW2 affect the number of participated countries ?**
+
+```{r, echo=FALSE}
+medal2 <-
+  olympics %>%
+  group_by(year, medal = medal=="Gold" , season) %>% #the idea here is when we group by medal = gold this will show us the number of games (one medal per game)
+  summarise(
+    TotalMedal = length(medal) ## i dont know whay na.rm do yet but when i remove it the graph change a lot
+  )
+medal2 %>%
+  filter(medal , medal == TRUE)    ->medal ##the idea here is will count the number of true(medal == gold) in each year summer or
+ggplot(medal , aes(year , TotalMedal  , color = season)) + geom_line() +
+  geom_point(aes(x=1945, y=300), size=30, shape=1, color="gold4") +
+  labs(title ="WWII & Olympcs " ,y = "Total Games", x = "YEAR of the event" , caption = "*the circles shows the start and the end of the war \n   ") +
+  # please change the title to good name
+  theme_bw() + theme(legend.position = c(.09,.85) , )
+```
+
+## Row 3 {data-height="350"}
+
+### Findings
+
+this shows the disperse of any German participant between 1939 and 1950
+because of the war . The number of participation did not return to
+before the war until 1967
+
+### **Germany in wrold war 2**
+
+```{r}
+olympics %>%
+  group_by(team , year ) %>%
+  filter(grepl("Germany", team)) %>%
+  # filter(team == "Germany" | team == "*Germany" ) %>%
+  summarise( team , year , numberOfParticipants= length(name) ,season) %>%
+  distinct() -> GermanyDataset
+GermanyDataset  %>%
+  ggplot(aes(year ,numberOfParticipants , fill = team )) + geom_bar(stat = "identity")+ ##  I dont like this plot but
+  facet_grid(. ~ season) +
+  labs(title = "Germany during WWII era" , caption = "between  1939 to 1950 germany did not play any olympics  ") +scale_color_brewer(palette = "Dark3")
+
+```
+
+## Row 3 {data-height="350"}
+
+### Findings
+
+xxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+### **Does the age of the athlete effect on his/her performance?**
+
+*The avg age in each year*
+
+```{r}
+olympics %>% 
+  select(year , team,age) %>%
+  filter(!is.na(age)) %>% 
+  group_by(year) %>% 
+  summarise(age = mean(age)) -> avrgAgeInEachYear 
+
+ggplot(avrgAgeInEachYear , aes(year , age)) + geom_point()+ geom_smooth(se = FALSE)
+
+winnersVslosers <- olympics %>% 
+  mutate(winner = if_else(is.na(medal),"loser","winner"))
+```
+
+### Findings
+
+xxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+### How old are most of the winners and losers?
+
+```{r}
+winnersVslosers$winner <- factor(winnersVslosers$winner,levels = c("loser","winner")) 
+
+winnersVslosers %>%
+  filter(!is.na(age)) %>% 
+  group_by(winner,age) %>% 
+  summarise(count=n()) -> winnersVslosers
+
+#plot
+winnersVslosers %>% 
+  ggplot(aes(x=age ,fill= winner)) +
+  geom_density(alpha=0.25)
+```
+
+## Row 3
+
+### Findings
+
+xxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+## Row
+
+### Mean of age in year With respect of kind of model
+
+```{r}
+medal <-
+  olympics %>% 
+  filter(!is.na(age),!is.na(medal)) %>% 
+  group_by(year, medal) %>% 
+  summarise(age = mean(age))
+
+#plot
+ggplot(medal , aes(x=year , y=age, color = medal)) + geom_line() +
+scale_color_manual(values=c("gold1","gray70","gold4")) 
+```
+
+## Row 3 {data-height="150"}
+
+### Findings
+
+xxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxXXXXXXXXXXXXXXxxxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxx
+
+## Row 3 {data-height="650"}
+
+### kids who got Olympics models(less than 13)
+
+```{r}
+olympics %>% 
+  filter(age<13, !is.na(medal)) %>% 
+  select(-year,-season) %>% 
+  arrange(desc(age)) %>%
+  head(5) %>%
+  knitr::kable()
+
+```
+
+## Row 3 {data-height="150"}
+
+### Findings
+
+xxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxXXXXXXXXXXXXXXxxxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxx
+
+## Row 3 {data-height="1000"}
+
+### kids who got Olympics models(less than 13)
+
+```{r}
+olympics %>%
+  filter(age>65, !is.na(medal)) %>%
+  select(-year,-season) %>% 
+  arrange(desc(age)) %>%
+  head(5) %>%
+  knitr::kable() 
+```
+
+# Problems and challenges
+
+***Winter and Summer Games were held in the same year up until 1992.
+After that, they staggered them such that Winter Games occur on a four
+year cycle starting with 1994, then Summer in 1996, then Winter in 1998,
+and so on.*** <br> ***How to decide which plots should be presented***
+<br> **There are only a few events that happened every year so it is
+hard to evaluate the attributes of the athlete without deep analysis**
+<br> **Using git we had some issues in pushing and pulling the content
+and how we organize our work** <br> **In the early years, there is a lot
+of missing data**
+
+# Key Takeaways from the dataset
+***The US has the highest number of medals and athletes.***<br>
+***Brazil has the highest number of medals in football.***<br>
+***Female participation in the Olympic Games is on the rise.***<br>
+***The size of Olympians have become more extreme over time. ***<br>
+***In most sports this means taller and heavier, but in a few sports such as gymnastics, athletes have become smaller.***<br>
+***The proportion of winners athletes with ages below 60 is higher than that above 60.***<br>
+***The Olympic Games plays a vital role in fostering unity among nations.***<br>

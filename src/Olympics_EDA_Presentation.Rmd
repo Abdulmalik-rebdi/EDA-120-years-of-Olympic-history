@@ -11,7 +11,6 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-install.packages("flexdashboard")
 library(flexdashboard)
 #loading reqiuerd packages
 library(plyr)
@@ -87,9 +86,8 @@ This is a historical dataset on the modern Olympic Games, including all the Game
 ### **The detailed summary for every type as follow**
 
 ```{r}
-
   olympics %>% 
-  select(sex,age,height,weight,year,season,medal)%>% 
+  select(sex,age,height,weight,year,season,medal) %>% 
   summary() 
 
   olympics %>% 
@@ -445,20 +443,24 @@ olympics %>%
 ```
 
 # Problems and challenges
-***Winter and Summer Games were held in the same year up until 1992.
+<font size="6em">
+- Winter and Summer Games were held in the same year up until 1992.
 After that, they staggered them such that Winter Games occur on a four
 year cycle starting with 1994, then Summer in 1996, then Winter in 1998,
-and so on.*** <br> ***How to decide which plots should be presented***
-<br> **There are only a few events that happened every year so it is
-hard to evaluate the attributes of the athlete without deep analysis**
-<br> **Using git we had some issues in pushing and pulling the content
-and how we organize our work** <br> **In the early years, there is a lot
-of missing data**
+and so on.
+<br><br>- How to decide which plots should be presented.
+<br><br>- There are only a few events that happened every year so it is
+hard to evaluate the attributes of the athlete without deep analysis.
+<br><br>- Using git we had some issues in pushing and pulling the content
+and how we organize our work.
+<br><br>- In the early years, there is a lot
+of missing data.</font>
 
 # Key Takeaways from the dataset
-***The US has the highest number of medals and athletes.***<br>
-***Brazil has the highest number of medals in football.***<br>
-***Female participation in the Olympic Games is on the rise.***<br>
-***The size of Olympians have become more extreme over time in most sports this means taller and heavier, but in a few sports such as gymnastics, athletes have become smaller.***<br>
-***The proportion of winners athletes with ages below 60 is higher than that above 60.***<br>
-***The Olympic Games plays a vital role in fostering unity among nations.***<br>
+<font size="6em">
+- The US has the highest number of medals and athletes.<br><br>
+- Brazil has the highest number of medals in football.<br><br>
+- Female participation in the Olympic Games is on the rise.<br><br>
+- The size of Olympians have become more extreme over time in most sports this means taller and heavier, but in a few sports such as gymnastics, athletes have become smaller.<br><br>
+- The proportion of winners athletes with ages below 60 is higher than that above 60.<br><br>
+- The Olympic Games plays a vital role in fostering unity among nations.<br></font>

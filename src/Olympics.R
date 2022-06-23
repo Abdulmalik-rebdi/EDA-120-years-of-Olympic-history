@@ -1,38 +1,5 @@
 
 
-# -----------------??-----------------------
-counts_NOC <- olympics %>% filter(year %in% c(1936,1956,1976,1996,2016)) %>%
-  group_by(year, noc, sex) %>%
-  summarize(Count = length(unique(id))) %>%
-  spread(sex, Count) %>%
-  mutate(Total = sum(M,F,na.rm=T)) %>%
-  filter(Total > 49) 
-names(counts_NOC)[3:4] <- c("Male","Female")
-counts_NOC$Male[is.na(counts_NOC$Male)] <- 0
-counts_NOC$Female[is.na(counts_NOC$Female)] <- 0
-counts_NOC$year <- as.factor(counts_NOC$year)
-
-ggplot(counts_NOC, aes(x=Male, y=Female, group=year, color=year)) +
-  geom_point(alpha=0.6) +
-  geom_abline(intercept=0, slope=1, linetype="dashed") +
-  geom_smooth(method="lm", se=FALSE) +
-  labs(title = "Female vs. Male Olympians from participating NOCs") +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  guides(color=guide_legend(reverse=TRUE))
-
-
-#ggplot(olympics, aes(noc, team)) +
- # geom_boxplot()
-
-olympics %>% group_by(name , team) %>%
-  ggplot(aes(x=name, y=team, group=name, color=name)) +
-  geom_point() +
-  geom_line() +
-  scale_color_manual(values=c("darkblue","red"))  +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  labs(title="Height/Weight data completeness from each Olympiad")
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 # Install & loading packages
 install.packages("kableExtra", dependencies = TRUE)
 install.packages("tidytuesdayR")
@@ -374,5 +341,35 @@ medal <-
 #plot
 ggplot(medal , aes(x=year , y=age, color = medal)) + geom_line() +
 scale_color_manual(values=c("gold1","gray70","gold4")) 
+
+#---------- 
+### this will show the first femail winner
+#there are 3 winner in 1900
+olympics %>%
+  filter(sex == "F" , medal =="Gold" ) %>%
+  arrange(year)
+### the number of noc
+### usa has 6
+olympics %>%
+  filter(year == 1904 , sex == "F") %>%
+  distinct(name , .keep_all= TRUE) %>%
+  group_by(noc) %>%
+  summarise(noc ,length(medal) ) %>%
+  distinct()
+### but in 1908
+### there 39 female participent
+olympics %>%
+  filter(year == 1908 , sex == "F") %>%
+  distinct(name , .keep_all= TRUE) %>%
+  group_by(noc) %>%
+  summarise(noc ,length(medal) ) %>%
+  distinct()
+## this will show the number of participent in 2016 (F/M)
+# there are 6223 F and 7465male meaning 45% are women
+olympics %>%
+  filter(year == 2016) %>%
+  group_by(sex) %>%
+  ئذsummarise(sex , length(id)) %>%
+  distinct()
   
 

@@ -12,91 +12,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(comment = NA, results='hide', message = FALSE, warning = FALSE )
-library(shiny)
-library(httr)
 
-# OAuth setup --------------------------------------------------------
-
-# Most OAuth applications require that you redirect to a fixed and known
-# set of URLs. Many only allow you to redirect to a single URL: if this
-# is the case for, you'll need to create an app for testing with a localhost
-# url, and an app for your deployed app.
-
-if (interactive()) {
-  # testing url
-  options(shiny.port = 8100)
-  APP_URL <- "http://localhost:8100/"
-} else {
-  # deployed URL
-  APP_URL <- "https://servername/path-to-app"
-}
-
-# Note that secret is not really secret, and it's fine to include inline
-app <- oauth_app("shinygithub",
-  key = "51d46f96810d1fd182a2",
-  secret = "66eec8782825eeb61007dbef32f91afc9c3587aa",
-  redirect_uri = APP_URL
-)
-
-# Here I'm using a canned endpoint, but you can create with oauth_endpoint()
-api <- oauth_endpoints("github")
-
-# Always request the minimal scope needed. For github, an empty scope
-# gives read-only access to public info
-scope <- ""
-
-# Shiny -------------------------------------------------------------------
-
-has_auth_code <- function(params) {
-  # params is a list object containing the parsed URL parameters. Return TRUE if
-  # based on these parameters, it looks like auth codes are present that we can
-  # use to get an access token. If not, it means we need to go through the OAuth
-  # flow.
-  return(!is.null(params$code))
-}
-
-ui <- fluidPage(
-  # Your regular UI goes here, for when everything is properly auth'd
-  verbatimTextOutput("code")
-)
-
-# A little-known feature of Shiny is that the UI can be a function, not just
-# objects. You can use this to dynamically render the UI based on the request.
-# We're going to pass this uiFunc, not ui, to shinyApp(). If you're using
-# ui.R/server.R style files, that's fine too--just make this function the last
-# expression in your ui.R file.
-uiFunc <- function(req) {
-  if (!has_auth_code(parseQueryString(req$QUERY_STRING))) {
-    url <- oauth2.0_authorize_url(api, app, scope = scope)
-    redirect <- sprintf("location.replace(\"%s\");", url)
-    tags$script(HTML(redirect))
-  } else {
-    ui
-  }
-}
-
-server <- function(input, output, session) {
-  params <- parseQueryString(isolate(session$clientData$url_search))
-  if (!has_auth_code(params)) {
-    return()
-  }
-
-  # Manually create a token
-  token <- oauth2.0_token(
-    app = app,
-    endpoint = api,
-    credentials = oauth2.0_access_token(api, app, params$code),
-    cache = FALSE
-  )
-
-  resp <- GET("https://api.github.com/user", config(token = token))
-  # TODO: check for success/failure here
-
-  output$code <- renderText(content(resp, "text"))
-}
-
-# Note that we're using uiFunc, not ui!
-shinyApp(uiFunc, server)
 
 ```
 
@@ -154,15 +70,9 @@ You can access the dataset directly from base package.
  abstract summary for the dataset
 
 ```{r}
-
-olympics %>% 
-<<<<<<< HEAD
-  skim_without_charts()
-=======
+  olympics %>% 
   select(sex,age,height,weight,year,season,medal)%>% 
   summary()
-
->>>>>>> 7472a38ab787d59966434bda719b361481bbd4f1
 
 
 ```
@@ -301,11 +211,7 @@ football_teams_medals %>%
   labs(x="Team",y="Number of Football Medals from 2000 to 2016")
 ```
 
-
-
-
-
-## know lets take a look if number of female athlete has increased since 1897 and if did why ?
+## now lets take a look if number of female athlete has increased since 1897 and if did why ?
 
 Interest NOCs are leading the way for gender equality in the Olympics,so some NOCs even sent a majority of female athletes to the Games ,In 1996 and 2016. The chart shows asimprovement in female participation from 1956 to 2016 .
 
@@ -350,10 +256,10 @@ height, weight has a similar trend as the reach the minimum point between 1950-1
 ```{r}
 olympics %>% 
   filter(!is.na(height)) %>% 
-  group_by(year) %>% 
+  group_by(year , sex) %>% 
   summarise( height= mean(height))-> avgHight
 
-ggplot(avgHight , aes(year , height)) + geom_point()+ geom_smooth(se = FALSE)
+ggplot(avgHight , aes(year , height , color = sex)) + geom_point()+ geom_smooth(se = FALSE)
 ```
 
 ### Weight
@@ -361,10 +267,10 @@ ggplot(avgHight , aes(year , height)) + geom_point()+ geom_smooth(se = FALSE)
 ```{r}
 olympics %>% 
   filter(!is.na(weight)) %>% 
-  group_by(year) %>% 
+  group_by(year , sex) %>% 
   summarise( weight= mean(weight))-> avgWeight
 
-ggplot(avgWeight , aes(year , weight)) + geom_point()+ geom_smooth(se = FALSE)
+ggplot(avgWeight , aes(year , weight , color= sex)) + geom_point()+ geom_smooth(se = FALSE)
 ```
 
 ### BMI
@@ -376,7 +282,7 @@ avgBMI$weight <- avgWeight$weight
 avgBMI <- avgBMI %>% 
   mutate(bmi = (weight)/(height/100 * height/100))
 
-ggplot(avgBMI ,aes(year , bmi) )+ geom_point()+ geom_smooth(se = FALSE)
+ggplot(avgBMI ,aes(year , bmi , color = sex) )+ geom_point()+ geom_smooth(se = FALSE)
 ```
 
 
@@ -550,6 +456,8 @@ AgeAndHowManyGold <-
 
 ```
 
+
+
 ```{r}
 
 AgeAndHowManyMedal <-
@@ -561,7 +469,6 @@ AgeAndHowManyMedal <-
 ggplot(AgeAndHowManyMedal , aes(x=year ,age , color = medal  ,size = count)) +  geom_jitter(alpha = 0.8, shape = 16 , width =1) +
   coord_fixed() + scale_color_brewer(palette = "BrBG") ## this will show ALL medal 
 ```
-
 
 ```{r}
 
@@ -582,3 +489,9 @@ ggplot(artAge, aes(year, age)) +
 
 # Conclusion
 
+- he US has the highest number of medals and athletes.
+- Brazil has the highest number of medals in football.
+- Female participation in the Olympic Games is on the rise.
+-The size of Olympians have become more extreme over time in most sports this means taller and heavier, but in a few sports such as gymnastics, athletes have become smaller.
+- The proportion of winners athletes with ages below 60 is higher than that above 60.
+- The Olympic Games plays a vital role in fostering unity among nations.
